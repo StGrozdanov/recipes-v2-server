@@ -1,0 +1,120 @@
+name: build
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+env:
+  PATH_PREFIX: ${{ github.workspace }}/src
+  CACHE_PREFIX: ""
+
+jobs:
+  install_app:
+    name: Install
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory || github.workspace }}/src
+    outputs:
+      cache-path: ${{ steps.app-cache.outputs.path }}
+      cache-key: ${{ steps.app-cache.outputs.key }}
+      cache-restore: ${{ steps.app-cache.outputs.restore }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Setup go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.x'
+          cache-dependency-path: ${{ env.PATH_PREFIX }}/go.sum
+      - name: Set cache outputs
+        id: app-cache
+        run: |
+          echo "path=${{ env.PATH_PREFIX }}/vendor" >> $GITHUB_OUTPUT
+          echo "key=${{ format('{0}vendor-{1}', env.CACHE_PREFIX, hashFiles(format('{0}/go.sum', env.PATH_PREFIX))) }}" >> $GITHUB_OUTPUT
+          echo "restore=${{ format('{0}vendor-', env.CACHE_PREFIX) }}" >> $GITHUB_OUTPUT
+      - name: Cache dependencies
+        id: cache-dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.app-cache.outputs.path }}
+          key: ${{ steps.app-cache.outputs.key }}
+          restore-keys: ${{ steps.app-cache.outputs.restore }}
+      - name: Install dependencies
+        id: install
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        run: |
+          go mod tidy
+          go mod vendor
+      - name: Build app
+        if: steps.install.outcome == 'success'
+        run: go build
+
+  lint_app:
+    name: Linters
+    needs: [ install_app ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Setup go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.x'
+          cache-dependency-path: ${{ env.PATH_PREFIX }}/go.sum
+      - name: Load dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.PATH_PREFIX }}/vendor
+          key: ${{ format('{0}vendor-{1}', env.CACHE_PREFIX, hashFiles(format('{0}/go.sum', env.PATH_PREFIX))) }}
+      - name: Run Linters
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          working-directory: src
+
+  test_app:
+    name: Tests
+    needs: [ install_app ]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory || github.workspace }}/src
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Setup go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.x'
+          cache-dependency-path: ${{ env.PATH_PREFIX }}/go.sum
+      - name: Load dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.PATH_PREFIX }}/vendor
+          key: ${{ format('{0}vendor-{1}', env.CACHE_PREFIX, hashFiles(format('{0}/go.sum', env.PATH_PREFIX))) }}
+      - name: Run tests
+        run: go test -v ./... -json > test-results-${{ github.ref_name }}.json
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-${{ github.ref_name }}.json
+          path: ${{ inputs.working-directory || github.workspace }}/test-results-${{ github.ref_name }}.json
+
+  deploy:
+    name: Deploy
+    needs: [ lint_app, test_app ]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory || github.workspace }}/src
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
