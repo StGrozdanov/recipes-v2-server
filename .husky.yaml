@@ -1,0 +1,4 @@
+pre-commit:
+  - "cd src && golangci-lint run"
+  - "cd src && go test -v ./..."
+

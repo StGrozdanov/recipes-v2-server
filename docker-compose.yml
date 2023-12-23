@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  recipes-server:
+    container_name: recipes-server
+    build:
+      context: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - default
+    volumes:
+      - ./:/app
+  postgres:
+    container_name: postgres
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: recipes
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql-init.sql:/docker-entrypoint-initdb.d/sql-init.sql
+    networks:
+      - default
+networks:
+  default:
+volumes:
+  postgres_data:
