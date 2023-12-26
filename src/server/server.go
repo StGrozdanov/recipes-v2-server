@@ -18,6 +18,7 @@ func setupRouter() (router *gin.Engine) {
 	router.GET("/healths", handlers.HealthCheck)
 	router.GET("/metrics", handlers.Metrics)
 
+	router.GET("/recipes", handlers.GetAllRecipes)
 	router.GET("/recipes/latest", handlers.GetLatestRecipes)
 	router.GET("/recipes/most-popular", handlers.GetMostPopularRecipes)
 
