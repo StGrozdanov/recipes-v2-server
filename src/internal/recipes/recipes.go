@@ -73,3 +73,17 @@ func Search(query string) (recipes []BaseRecipeInfo, err error) {
 
 	return
 }
+
+// SearchByCategory searches for recipes by category name with the provided string
+func SearchByCategory(query string) (recipes []BaseRecipeInfo, err error) {
+	err = database.GetMultipleRecordsNamedQuery(
+		&recipes,
+		`SELECT recipe_name,
+					   image_url
+				FROM recipes
+				WHERE category = :query
+				ORDER BY visitations_count DESC;`,
+		map[string]interface{}{"query": query},
+	)
+	return
+}

@@ -96,3 +96,29 @@ func GetMostPopularRecipes(ginCtx *gin.Context) {
 	}
 	ginCtx.JSON(http.StatusOK, mostPopularRecipes)
 }
+
+func GetByCategory(ginCtx *gin.Context) {
+	query := ginCtx.Request.URL.Query().Get("name")
+
+	if query == "" {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "category name should not be empty"})
+		return
+	}
+
+	recipesData, err := recipes.SearchByCategory(query)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			ginCtx.JSON(http.StatusOK, map[string]interface{}{})
+			return
+		}
+
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Error("Error on search recipes from the database")
+
+		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+	ginCtx.JSON(http.StatusOK, recipesData)
+}
