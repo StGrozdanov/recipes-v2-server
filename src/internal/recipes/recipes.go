@@ -1,6 +1,8 @@
 package recipes
 
-import "recipes-v2-server/database"
+import (
+	"recipes-v2-server/database"
+)
 
 // GetAll gets the recipes in a pageable way
 func GetAll(limit, cursor int) (recipes RecipePaginationInfo, err error) {
@@ -52,5 +54,22 @@ func GetMostPopular() (recipes []BaseRecipeInfo, err error) {
 				ORDER BY visitations_count DESC
 				LIMIT 3;`,
 	)
+	return
+}
+
+// Search searches for recipes by name with the provided string
+func Search(query string) (recipes []BaseRecipeInfo, err error) {
+	filter := "%" + query + "%"
+
+	err = database.GetMultipleRecordsNamedQuery(
+		&recipes,
+		`SELECT recipe_name,
+					   image_url
+				FROM recipes
+				WHERE recipe_name LIKE :query
+				ORDER BY visitations_count DESC;`,
+		map[string]interface{}{"query": filter},
+	)
+
 	return
 }

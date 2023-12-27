@@ -12,11 +12,32 @@ import (
 func GetAllRecipes(ginCtx *gin.Context) {
 	limitAsString := ginCtx.Request.URL.Query().Get("limit")
 	cursorAsString := ginCtx.Request.URL.Query().Get("cursor")
+	search := ginCtx.Request.URL.Query().Get("search")
 
 	limit, limitErr := strconv.Atoi(limitAsString)
 	cursor, cursorErr := strconv.Atoi(cursorAsString)
-	if limitErr != nil || cursorErr != nil {
-		ginCtx.JSON(http.StatusBadRequest, map[string]string{"error": "limit and cursor are required parameters and should be of type int"})
+	if limitErr != nil && search == "" || cursorErr != nil && search == "" {
+		ginCtx.JSON(http.StatusBadRequest, map[string]string{"error": "limit and cursor are required parameters and should be of type int. If they are not provided - search parameter should be provided instead."})
+		return
+	}
+
+	if search != "" {
+		recipesData, err := recipes.Search(search)
+		if err != nil {
+			if err.Error() == "sql: no rows in result set" {
+				ginCtx.JSON(http.StatusOK, map[string]interface{}{})
+				return
+			}
+
+			utils.
+				GetLogger().
+				WithFields(log.Fields{"error": err.Error()}).
+				Error("Error on search recipes from the database")
+
+			ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+			return
+		}
+		ginCtx.JSON(http.StatusOK, recipesData)
 		return
 	}
 
