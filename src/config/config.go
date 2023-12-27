@@ -16,6 +16,8 @@ type configurations struct {
 
 	JWTSecret string `json:"jwt_secret" koanf:"JWT_SECRET" valid:"required"`
 
+	Salt string `json:"salt_rounds" koanf:"SALT_ROUNDS" valid:"required"`
+
 	DBHosts    string `json:"db_hosts" koanf:"DB_HOSTS" valid:"required"`
 	DBUsername string `json:"db_username" koanf:"DB_USERNAME" valid:"required"`
 	DBPassword string `json:"db_password" koanf:"DB_PASSWORD" valid:"required"`

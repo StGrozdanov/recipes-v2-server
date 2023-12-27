@@ -25,6 +25,8 @@ func setupRouter() (router *gin.Engine) {
 
 	router.GET("/comments/latest", handlers.GetLatestComments)
 
+	router.POST("/auth/login", handlers.Login)
+
 	return
 }
 

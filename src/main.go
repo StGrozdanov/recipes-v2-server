@@ -4,6 +4,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"recipes-v2-server/config"
 	"recipes-v2-server/database"
+	"recipes-v2-server/internal/auth"
 	"recipes-v2-server/server"
 	"recipes-v2-server/utils"
 )
@@ -37,6 +38,8 @@ func init() {
 	)
 
 	utils.GetJWTKey(app.JWTSecret)
+
+	auth.GetSaltRounds(app.Salt)
 }
 
 func main() {
