@@ -82,3 +82,23 @@ func updateUserPassword(loginData UserAuthData, userData *UserAuthDataResult) (u
 	userData.NewPassword = string(hashedPassword)
 	return
 }
+
+// UsernameExists checks if username exists in the database and returns a boolean value
+func UsernameExists(usernameData UsernameData) (exists bool, err error) {
+	err = database.GetSingleRecordNamedQuery(
+		&exists,
+		`SELECT EXISTS(SELECT username FROM users WHERE username = :username);`,
+		usernameData,
+	)
+	return !exists, err
+}
+
+// EmailExists checks if email exists in the database and returns a boolean value
+func EmailExists(emailData EmailData) (exists bool, err error) {
+	err = database.GetSingleRecordNamedQuery(
+		&exists,
+		`SELECT EXISTS(SELECT email FROM users WHERE email = :email);`,
+		emailData,
+	)
+	return !exists, err
+}

@@ -1,5 +1,13 @@
 package auth
 
+type UsernameData struct {
+	Username string `db:"username" json:"username" valid:"required,minstringlength(3)"`
+}
+
+type EmailData struct {
+	Email string `db:"email" json:"email" valid:"required,email"`
+}
+
 type UserAuthData struct {
 	Username string `db:"username" json:"username" valid:"required,minstringlength(3)"`
 	Password string `db:"password" json:"password" valid:"required,minstringlength(3)"`
