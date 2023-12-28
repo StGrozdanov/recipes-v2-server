@@ -1,10 +1,12 @@
 package auth
 
 import (
+	"github.com/nleeper/goment"
 	"golang.org/x/crypto/bcrypt"
 	"recipes-v2-server/database"
 	"recipes-v2-server/utils"
 	"strconv"
+	"time"
 )
 
 var saltRounds int
@@ -50,7 +52,10 @@ func Login(loginData UserAuthData) (userData UserAuthDataResult, err error) {
 		return
 	}
 
-	jwtToken, err := utils.GenerateJWT(userData.Role)
+	jwtToken, err := utils.GenerateJWT(utils.GenerateJWTParams{
+		Role:       userData.Role,
+		Expiration: 1 * time.Hour,
+	})
 	if err != nil {
 		return
 	}
@@ -144,11 +149,53 @@ func Register(registrationData UserRegistrationData) (userData UserAuthDataResul
 		return
 	}
 
-	jwtToken, err := utils.GenerateJWT(userData.Role)
+	jwtToken, err := utils.GenerateJWT(utils.GenerateJWTParams{
+		Role:       userData.Role,
+		Expiration: 1 * time.Hour,
+	})
 	if err != nil {
 		return
 	}
 
 	userData.SessionToken = jwtToken
+	return
+}
+
+// RequestVerificationCode generates a JWT token with reduced expiry used as verification code for the user
+// with the given email
+func RequestVerificationCode(emailData EmailData) (response VerificationCodeData, err error) {
+	jwtToken, jwtErr := utils.GenerateJWT(utils.GenerateJWTParams{
+		Role:       "",
+		Expiration: 20 * time.Minute,
+	})
+	if jwtErr != nil {
+		return response, jwtErr
+	}
+
+	dateNow, dateErr := goment.New(time.Now())
+	if err != nil {
+		return response, dateErr
+	}
+
+	err = database.GetSingleRecordNamedQuery(
+		&response,
+		`WITH user_data AS (SELECT id, email, username, :code AS code
+                   FROM users
+                   WHERE email = :email),
+
+					 insert_data AS (INSERT
+						 INTO password_requests (code, issued_at, issued_by_user, publication_status_enum)
+							 VALUES (:code, :issued_at, (SELECT id FROM user_data), 'PENDING'))
+				
+				SELECT email,
+					   username,
+					   code
+				FROM user_data;`,
+		map[string]interface{}{"email": emailData.Email, "code": jwtToken, "issued_at": dateNow.UTC().Format("YYYY-MM-DD")},
+	)
+	if err != nil {
+		return
+	}
+
 	return
 }

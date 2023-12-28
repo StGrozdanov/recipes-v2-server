@@ -148,3 +148,36 @@ func Register(ginCtx *gin.Context) {
 	}
 	ginCtx.JSON(http.StatusOK, userData)
 }
+
+func GenerateVerificationCode(ginCtx *gin.Context) {
+	request := auth.EmailData{}
+
+	if err := ginCtx.ShouldBind(&request); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "invalid email"})
+		return
+	}
+
+	if _, err := validator.ValidateStruct(request); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": fmt.Sprintf("email is invalid - %s", err),
+		})
+		return
+	}
+
+	verificationData, err := auth.RequestVerificationCode(request)
+	if err != nil {
+		if strings.Contains(err.Error(), "pq") {
+			ginCtx.JSON(http.StatusNotFound, map[string]interface{}{"error": "such email was not found"})
+			return
+		}
+
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Error("Error on verification code request attempt")
+
+		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+	ginCtx.JSON(http.StatusOK, verificationData)
+}

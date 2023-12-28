@@ -11,15 +11,28 @@ type TokenClaims struct {
 	jwt.RegisteredClaims
 }
 
+type GenerateJWTParams struct {
+	Role       string
+	Expiration time.Duration
+}
+
 var tokenKey string
 
 // GenerateJWT generates a new JWT access token
-func GenerateJWT(userRole string) (string, error) {
+func GenerateJWT(params GenerateJWTParams) (string, error) {
+	var expirationTime time.Duration
+
+	if params.Expiration != 0 {
+		expirationTime = params.Expiration
+	} else {
+		expirationTime = 1 * time.Hour
+	}
+
 	claims := TokenClaims{
-		userRole,
+		params.Role,
 		jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expirationTime)),
 		},
 	}
 

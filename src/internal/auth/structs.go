@@ -19,6 +19,12 @@ type UserRegistrationData struct {
 	Email    string `db:"email" json:"email" valid:"required,email"`
 }
 
+type VerificationCodeData struct {
+	Username string `db:"username" json:"username"`
+	Email    string `db:"email" json:"email"`
+	Code     string `json:"code"`
+}
+
 type UserAuthDataResult struct {
 	Username        string `db:"username" json:"username"`
 	Role            string `db:"role" json:"-"`
