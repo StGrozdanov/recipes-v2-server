@@ -212,3 +212,29 @@ func VerifyCode(ginCtx *gin.Context) {
 	}
 	ginCtx.JSON(http.StatusOK, isValid)
 }
+
+func ResetPassword(ginCtx *gin.Context) {
+	request := auth.ResetPasswordData{}
+
+	if err := ginCtx.ShouldBind(&request); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "invalid password or user id"})
+		return
+	}
+
+	if _, err := validator.ValidateStruct(request); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "invalid password or user id"})
+		return
+	}
+
+	success, err := auth.ChangePassword(request)
+	if err != nil {
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Error("Error on verification code request attempt")
+
+		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+	ginCtx.JSON(http.StatusOK, success)
+}

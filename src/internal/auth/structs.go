@@ -12,6 +12,11 @@ type CodeData struct {
 	Code string `json:"code" valid:"required"`
 }
 
+type ResetPasswordData struct {
+	Password string `db:"password" json:"password" valid:"required,minstringlength(4)"`
+	Id       int    `db:"id" json:"id" valid:"required"`
+}
+
 type UserAuthData struct {
 	Username string `db:"username" json:"username" valid:"required,minstringlength(3)"`
 	Password string `db:"password" json:"password" valid:"required,minstringlength(3)"`

@@ -228,3 +228,36 @@ func ValidateCode(code string) (isValid bool, err error) {
 	}
 	return
 }
+
+// ChangePassword changes the password of the user if he successfully went through the whole password reset
+// flow
+func ChangePassword(resetData ResetPasswordData) (success bool, err error) {
+	var passedVerification bool
+
+	err = database.GetSingleRecordNamedQuery(
+		&passedVerification,
+		`SELECT EXISTS(SELECT id 
+              				  FROM password_requests 
+              				  WHERE issued_by_user = :id AND publication_status_enum = 'APPROVED'
+              	)`,
+		resetData,
+	)
+
+	if err != nil || !passedVerification {
+		return
+	}
+
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(resetData.Password), saltRounds)
+	resetData.Password = string(hashedPassword)
+
+	_, err = database.ExecuteNamedQuery(
+		`UPDATE users SET new_password = :password WHERE id = :id;`,
+		resetData,
+	)
+	if err != nil {
+		return
+	}
+
+	success = true
+	return
+}
