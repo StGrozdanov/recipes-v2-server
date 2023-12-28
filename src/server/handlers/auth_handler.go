@@ -228,6 +228,11 @@ func ResetPassword(ginCtx *gin.Context) {
 
 	success, err := auth.ChangePassword(request)
 	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "invalid code"})
+			return
+		}
+
 		utils.
 			GetLogger().
 			WithFields(log.Fields{"error": err.Error()}).

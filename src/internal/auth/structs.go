@@ -14,7 +14,7 @@ type CodeData struct {
 
 type ResetPasswordData struct {
 	Password string `db:"password" json:"password" valid:"required,minstringlength(4)"`
-	Id       int    `db:"id" json:"id" valid:"required"`
+	Id       string `db:"id" json:"id" valid:"required"`
 }
 
 type UserAuthData struct {
