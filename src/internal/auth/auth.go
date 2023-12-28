@@ -199,3 +199,32 @@ func RequestVerificationCode(emailData EmailData) (response VerificationCodeData
 
 	return
 }
+
+// ValidateCode verifies the JWT token and returns a boolean value if it's valid or not. If it's valid it will
+// set the verification code status flow to APPROVED instead of PENDING.
+func ValidateCode(code string) (isValid bool, err error) {
+	_, isValid, err = utils.ParseJWT(code)
+	if err != nil || !isValid {
+		return
+	}
+
+	err = database.GetSingleRecordNamedQuery(
+		&isValid,
+		`SELECT EXISTS(SELECT id FROM password_requests WHERE code = :code);`,
+		map[string]interface{}{"code": code},
+	)
+	if err != nil {
+		return
+	}
+
+	if isValid {
+		_, err = database.ExecuteNamedQuery(
+			`UPDATE password_requests SET publication_status_enum = 'APPROVED' WHERE code = :code;`,
+			map[string]interface{}{"code": code},
+		)
+		if err != nil {
+			return
+		}
+	}
+	return
+}

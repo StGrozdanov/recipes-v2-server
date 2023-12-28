@@ -181,3 +181,34 @@ func GenerateVerificationCode(ginCtx *gin.Context) {
 	}
 	ginCtx.JSON(http.StatusOK, verificationData)
 }
+
+func VerifyCode(ginCtx *gin.Context) {
+	request := auth.CodeData{}
+
+	if err := ginCtx.ShouldBind(&request); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "invalid verification code"})
+		return
+	}
+
+	if _, err := validator.ValidateStruct(request); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "invalid verification code"})
+		return
+	}
+
+	isValid, err := auth.ValidateCode(request.Code)
+	if err != nil {
+		if strings.Contains(err.Error(), "token") {
+			ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "invalid code"})
+			return
+		}
+
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Error("Error on verification code request attempt")
+
+		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+	ginCtx.JSON(http.StatusOK, isValid)
+}
