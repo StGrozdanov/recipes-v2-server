@@ -1,5 +1,7 @@
 package recipes
 
+import "github.com/lib/pq"
+
 type ExtendedRecipeInfo struct {
 	ImageURL   string `json:"imageURL" db:"image_url"`
 	RecipeName string `json:"recipeName" db:"recipe_name"`
@@ -23,4 +25,17 @@ type PageData struct {
 	NextPage  int  `json:"nextPage"`
 	FirstPage bool `json:"firstPage"`
 	LastPage  bool `json:"lastPage"`
+}
+
+type RecipeData struct {
+	RecipeName      string         `db:"recipe_name" json:"recipeName"`
+	Products        pq.StringArray `db:"products" json:"products"`
+	Steps           pq.StringArray `db:"steps" json:"steps"`
+	ImageURL        string         `db:"image_url" json:"imageURL"`
+	CategoryName    string         `db:"category" json:"category"`
+	Difficulty      string         `db:"difficulty" json:"difficulty"`
+	OwnerId         string         `db:"owner_id" json:"ownerId"`
+	PreparationTime int            `db:"preparation_time" json:"preparationTime"`
+	Calories        int            `db:"calories" json:"calories"`
+	Protein         int            `db:"protein" json:"protein"`
 }

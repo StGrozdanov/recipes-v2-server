@@ -87,3 +87,34 @@ func SearchByCategory(query string) (recipes []BaseRecipeInfo, err error) {
 	)
 	return
 }
+
+// GetASingleRecipe gets the recipe with provided name from the database
+func GetASingleRecipe(recipeName string) (recipe RecipeData, err error) {
+	err = database.GetSingleRecordNamedQuery(
+		&recipe,
+		`WITH steps_results AS (SELECT ARRAY_AGG(steps) AS steps
+                       FROM recipe_entity_steps
+                       WHERE recipe_entity_id = (SELECT id FROM recipes WHERE recipe_name = :recipe_name)),
+
+					 products_results AS (SELECT ARRAY_AGG(products) AS products
+										  FROM recipe_entity_products
+										  WHERE recipe_entity_id = (SELECT id FROM recipes WHERE recipe_name = :recipe_name))
+				
+				SELECT recipe_name,
+					   image_url,
+					   owner_id,
+					   COALESCE(calories, 0) AS calories,
+					   preparation_time,
+					   COALESCE(protein, 0) AS protein,
+					   difficulty,
+					   (SELECT steps FROM steps_results) AS steps,
+					   (SELECT products FROM products_results) AS products,
+					   category
+				FROM recipes
+						 JOIN recipe_entity_products ON recipes.id = recipe_entity_products.recipe_entity_id
+						 JOIN recipe_entity_steps ON recipes.id = recipe_entity_steps.recipe_entity_id
+				WHERE recipe_name = :recipe_name;`,
+		map[string]interface{}{"recipe_name": recipeName},
+	)
+	return
+}

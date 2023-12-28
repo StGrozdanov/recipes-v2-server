@@ -22,6 +22,7 @@ func setupRouter() (router *gin.Engine) {
 	router.GET("/recipes/category", handlers.GetByCategory)
 	router.GET("/recipes/latest", handlers.GetLatestRecipes)
 	router.GET("/recipes/most-popular", handlers.GetMostPopularRecipes)
+	router.GET("/recipes/:name", handlers.GetRecipe)
 
 	router.GET("/comments/latest", handlers.GetLatestComments)
 

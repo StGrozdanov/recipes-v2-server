@@ -122,3 +122,29 @@ func GetByCategory(ginCtx *gin.Context) {
 	}
 	ginCtx.JSON(http.StatusOK, recipesData)
 }
+
+func GetRecipe(ginCtx *gin.Context) {
+	recipeName, ok := ginCtx.Params.Get("name")
+
+	if !ok {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"errors": "recipe name was not found"})
+		return
+	}
+
+	recipe, err := recipes.GetASingleRecipe(recipeName)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			ginCtx.JSON(http.StatusOK, map[string]interface{}{})
+			return
+		}
+
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Error("Error on getting the most popular recipes from the database")
+
+		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+	ginCtx.JSON(http.StatusOK, recipe)
+}
