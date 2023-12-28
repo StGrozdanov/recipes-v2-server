@@ -102,3 +102,53 @@ func EmailExists(emailData EmailData) (exists bool, err error) {
 	)
 	return !exists, err
 }
+
+// Register user registration handler
+func Register(registrationData UserRegistrationData) (userData UserAuthDataResult, err error) {
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(registrationData.Password), saltRounds)
+	registrationData.Password = string(hashedPassword)
+
+	err = database.GetSingleRecordNamedQuery(
+		&userData,
+		`WITH user_data AS (
+					INSERT INTO users (is_blocked, email, password, username, new_password)
+						VALUES (false, :email, :password, :username, :password)
+						RETURNING *),
+				
+					 role_data AS (
+						 INSERT
+							 INTO users_roles (user_entity_id, roles_id)
+								 VALUES ((SELECT id FROM user_data), 3)
+								 RETURNING *)
+				
+				SELECT user_data.id,
+					   username,
+					   COALESCE(avatar_url, '')      AS avatar_url,
+					   COALESCE(cover_photo_url, '') AS cover_photo_url,
+					   email,
+					   role,
+					   CASE role
+						   WHEN 'ADMINISTRATOR' THEN true
+						   ELSE false
+						   END                       AS is_administrator,
+					   CASE role
+						   WHEN 'MODERATOR' THEN true
+						   ELSE false
+						   END                       AS is_moderator
+				FROM user_data
+						 JOIN role_data ON role_data.user_entity_id = user_data.id
+						 JOIN roles ON role_data.roles_id = roles.id;`,
+		registrationData,
+	)
+	if err != nil {
+		return
+	}
+
+	jwtToken, err := utils.GenerateJWT(userData.Role)
+	if err != nil {
+		return
+	}
+
+	userData.SessionToken = jwtToken
+	return
+}

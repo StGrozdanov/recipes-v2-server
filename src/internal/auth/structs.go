@@ -13,6 +13,12 @@ type UserAuthData struct {
 	Password string `db:"password" json:"password" valid:"required,minstringlength(3)"`
 }
 
+type UserRegistrationData struct {
+	Username string `db:"username" json:"username" valid:"required,minstringlength(3)"`
+	Password string `db:"password" json:"password" valid:"required,minstringlength(3)"`
+	Email    string `db:"email" json:"email" valid:"required,email"`
+}
+
 type UserAuthDataResult struct {
 	Username        string `db:"username" json:"username"`
 	Role            string `db:"role" json:"-"`
