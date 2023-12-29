@@ -11,7 +11,7 @@ func GetAll(limit, cursor int) (recipes RecipePaginationInfo, err error) {
 		`SELECT recipe_name,
 					   image_url
 				FROM recipes
-				WHERE id > :cursor
+				WHERE id > :cursor AND status = 'APPROVED'
 				ORDER BY created_at
 				LIMIT :limit;`,
 		map[string]interface{}{"limit": limit, "cursor": cursor},
@@ -38,6 +38,7 @@ func GetLatest() (recipes []ExtendedRecipeInfo, err error) {
 					   image_url,
 					   category
 				FROM recipes
+				WHERE status = 'APPROVED'
 				ORDER BY created_at DESC
 				LIMIT 3;`,
 	)
@@ -66,7 +67,7 @@ func Search(query string) (recipes []BaseRecipeInfo, err error) {
 		`SELECT recipe_name,
 					   image_url
 				FROM recipes
-				WHERE recipe_name LIKE :query
+				WHERE recipe_name LIKE :query AND status = 'APPROVED'
 				ORDER BY visitations_count DESC;`,
 		map[string]interface{}{"query": filter},
 	)
@@ -81,7 +82,7 @@ func SearchByCategory(query string) (recipes []BaseRecipeInfo, err error) {
 		`SELECT recipe_name,
 					   image_url
 				FROM recipes
-				WHERE category = :query
+				WHERE category = :query AND status = 'APPROVED'
 				ORDER BY visitations_count DESC;`,
 		map[string]interface{}{"query": query},
 	)
