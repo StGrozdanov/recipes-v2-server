@@ -25,6 +25,7 @@ func setupRouter() (router *gin.Engine) {
 	router.GET("/recipes/:name", handlers.GetRecipe)
 
 	router.GET("/comments/latest", handlers.GetLatestComments)
+	router.GET("/comments/:recipeName", handlers.GetRecipeComments)
 
 	router.POST("/auth/login", handlers.Login)
 	router.POST("/auth/check-username", handlers.CheckUsername)

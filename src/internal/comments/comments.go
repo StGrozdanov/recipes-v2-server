@@ -10,7 +10,7 @@ func GetLatestComments() (comments []Comment, err error) {
 					   comments.created_at,
 					   recipes.recipe_name,
 					   users.username,
-					   users.avatar_url
+					   COALESCE(users.avatar_url, '') AS avatar_url
 				FROM comments
 						 JOIN recipes ON comments.target_recipe_id = recipes.id
 						 JOIN users ON comments.owner_id = users.id
@@ -18,5 +18,24 @@ func GetLatestComments() (comments []Comment, err error) {
 				LIMIT 6;`,
 	)
 
+	return
+}
+
+// GetCommentsForRecipe gets the comments for the requested recipe name
+func GetCommentsForRecipe(recipeName string) (comments []Comment, err error) {
+	err = database.GetMultipleRecordsNamedQuery(
+		&comments,
+		`SELECT comments.content,
+					   comments.created_at,
+					   recipes.recipe_name,
+					   users.username,
+					   COALESCE(users.avatar_url, '') AS avatar_url
+				FROM comments
+						 JOIN recipes ON comments.target_recipe_id = recipes.id
+						 JOIN users ON comments.owner_id = users.id
+				WHERE recipes.recipe_name = :recipe_name
+				ORDER BY created_at DESC;`,
+		map[string]interface{}{"recipe_name": recipeName},
+	)
 	return
 }
