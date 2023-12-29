@@ -1,6 +1,9 @@
 package recipes
 
-import "github.com/lib/pq"
+import (
+	"github.com/lib/pq"
+	"recipes-v2-server/internal/users"
+)
 
 type ExtendedRecipeInfo struct {
 	ImageURL   string `json:"imageURL" db:"image_url"`
@@ -34,8 +37,8 @@ type RecipeData struct {
 	ImageURL        string         `db:"image_url" json:"imageURL"`
 	CategoryName    string         `db:"category" json:"category"`
 	Difficulty      string         `db:"difficulty" json:"difficulty"`
-	OwnerId         string         `db:"owner_id" json:"ownerId"`
 	PreparationTime int            `db:"preparation_time" json:"preparationTime"`
 	Calories        int            `db:"calories" json:"calories"`
 	Protein         int            `db:"protein" json:"protein"`
+	users.OwnerData `json:"owner"`
 }

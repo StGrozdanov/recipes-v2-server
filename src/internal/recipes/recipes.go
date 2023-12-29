@@ -102,17 +102,19 @@ func GetASingleRecipe(recipeName string) (recipe RecipeData, err error) {
 				
 				SELECT recipe_name,
 					   image_url,
-					   owner_id,
-					   COALESCE(calories, 0) AS calories,
+					   COALESCE(calories, 0)                   AS calories,
 					   preparation_time,
-					   COALESCE(protein, 0) AS protein,
+					   COALESCE(protein, 0)                    AS protein,
 					   difficulty,
-					   (SELECT steps FROM steps_results) AS steps,
+					   (SELECT steps FROM steps_results)       AS steps,
 					   (SELECT products FROM products_results) AS products,
-					   category
+					   category,
+					   users.id                                AS ownerId,
+					   users.username                          AS owner_name
 				FROM recipes
-						 JOIN recipe_entity_products ON recipes.id = recipe_entity_products.recipe_entity_id
-						 JOIN recipe_entity_steps ON recipes.id = recipe_entity_steps.recipe_entity_id
+						 LEFT JOIN recipe_entity_products ON recipes.id = recipe_entity_products.recipe_entity_id
+						 LEFT JOIN recipe_entity_steps ON recipes.id = recipe_entity_steps.recipe_entity_id
+						 LEFT JOIN users ON users.id = recipes.owner_id
 				WHERE recipe_name = :recipe_name;`,
 		map[string]interface{}{"recipe_name": recipeName},
 	)
