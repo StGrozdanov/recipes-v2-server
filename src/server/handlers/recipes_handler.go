@@ -148,3 +148,29 @@ func GetRecipe(ginCtx *gin.Context) {
 	}
 	ginCtx.JSON(http.StatusOK, recipe)
 }
+
+func GetRecipesByUser(ginCtx *gin.Context) {
+	username, ok := ginCtx.Params.Get("username")
+
+	if !ok {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"errors": "owner username was not found"})
+		return
+	}
+
+	recipesResults, err := recipes.GetRecipesFromUser(username)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			ginCtx.JSON(http.StatusOK, map[string]interface{}{})
+			return
+		}
+
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Error("Error on getting the recipes from the database")
+
+		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+	ginCtx.JSON(http.StatusOK, recipesResults)
+}

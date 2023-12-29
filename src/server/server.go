@@ -23,6 +23,9 @@ func setupRouter() (router *gin.Engine) {
 	router.GET("/recipes/latest", handlers.GetLatestRecipes)
 	router.GET("/recipes/most-popular", handlers.GetMostPopularRecipes)
 	router.GET("/recipes/:name", handlers.GetRecipe)
+	router.GET("/recipes/user/:username", handlers.GetRecipesByUser)
+
+	router.GET("/users/:username", handlers.GetUser)
 
 	router.GET("/comments/latest", handlers.GetLatestComments)
 	router.GET("/comments/:recipeName", handlers.GetRecipeComments)

@@ -121,3 +121,18 @@ func GetASingleRecipe(recipeName string) (recipe RecipeData, err error) {
 	)
 	return
 }
+
+// GetRecipesFromUser gets the recipes created from the given user
+func GetRecipesFromUser(username string) (recipes []BaseRecipeInfo, err error) {
+	err = database.GetMultipleRecordsNamedQuery(
+		&recipes,
+		`SELECT recipe_name,
+					   image_url
+				FROM recipes
+						 JOIN users ON recipes.owner_id = users.id
+				WHERE username = :username
+				ORDER BY visitations_count DESC;`,
+		map[string]interface{}{"username": username},
+	)
+	return
+}
