@@ -44,6 +44,13 @@ func setupRouter() (router *gin.Engine) {
 	{
 		authGroup.GET("/notifications/:username", handlers.GetNotifications)
 		authGroup.PUT("/notifications", handlers.MarkNotificationAsRead)
+
+		imageUploadGroup := authGroup.Group("/upload/image/users")
+		imageUploadGroup.Use(middlewares.ImageContentTypeMiddleware())
+		{
+			imageUploadGroup.POST("/cover-image", handlers.UploadCoverImage)
+			imageUploadGroup.POST("/avatar-image", handlers.UploadAvatarImage)
+		}
 	}
 
 	return
