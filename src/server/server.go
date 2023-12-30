@@ -30,8 +30,6 @@ func setupRouter() (router *gin.Engine) {
 	router.GET("/comments/latest", handlers.GetLatestComments)
 	router.GET("/comments/:recipeName", handlers.GetRecipeComments)
 
-	router.GET("/notifications/:username", middlewares.AuthMiddleware(), handlers.GetNotifications)
-
 	router.POST("/auth/login", handlers.Login)
 	router.POST("/auth/check-username", handlers.CheckUsername)
 	router.POST("/auth/check-email", handlers.CheckEmail)
@@ -39,6 +37,13 @@ func setupRouter() (router *gin.Engine) {
 	router.POST("/auth/generate-verification-code", handlers.GenerateVerificationCode)
 	router.POST("/auth/verify-code", handlers.VerifyCode)
 	router.POST("/auth/reset-password", handlers.ResetPassword)
+
+	authGroup := router.Group("")
+	authGroup.Use(middlewares.AuthMiddleware())
+	{
+		authGroup.GET("/notifications/:username", handlers.GetNotifications)
+		authGroup.PUT("/notifications", handlers.MarkNotificationAsRead)
+	}
 
 	return
 }
