@@ -136,3 +136,19 @@ func GetRecipesFromUser(username string) (recipes []BaseRecipeInfo, err error) {
 	)
 	return
 }
+
+// GetFavourites gets the recipes favourite of the given user
+func GetFavourites(username string) (recipes []BaseRecipeInfo, err error) {
+	err = database.GetMultipleRecordsNamedQuery(
+		&recipes,
+		`SELECT recipe_name,
+					   image_url
+				FROM users
+						 JOIN users_favourites ON users_favourites.user_entity_id = users.id
+						 JOIN recipes ON recipes.id = users_favourites.favourites_id
+				WHERE username = :username
+				ORDER BY visitations_count DESC;`,
+		map[string]interface{}{"username": username},
+	)
+	return
+}
