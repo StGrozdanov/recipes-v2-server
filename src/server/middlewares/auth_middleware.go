@@ -16,14 +16,9 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		token := ctx.Request.Header["X-Authorization"][0]
 
-		claims, isValid, err := utils.ParseJWT(token)
+		_, isValid, err := utils.ParseJWT(token)
 		if err != nil || !isValid {
 			ctx.AbortWithStatusJSON(http.StatusForbidden, map[string]interface{}{"message": "Invalid token"})
-			return
-		}
-
-		if claims.Role != "administrator" {
-			ctx.AbortWithStatusJSON(http.StatusForbidden, map[string]interface{}{"message": "Invalid permissions"})
 			return
 		}
 

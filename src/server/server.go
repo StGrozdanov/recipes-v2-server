@@ -30,6 +30,8 @@ func setupRouter() (router *gin.Engine) {
 	router.GET("/comments/latest", handlers.GetLatestComments)
 	router.GET("/comments/:recipeName", handlers.GetRecipeComments)
 
+	router.GET("/notifications/:username", middlewares.AuthMiddleware(), handlers.GetNotifications)
+
 	router.POST("/auth/login", handlers.Login)
 	router.POST("/auth/check-username", handlers.CheckUsername)
 	router.POST("/auth/check-email", handlers.CheckEmail)
