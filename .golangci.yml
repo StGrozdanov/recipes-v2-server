@@ -8,6 +8,8 @@ issues:
     - path: handlers # disable needing to document handlers
       linters:
         - revive
+    - path: server/server.go
+      text: "Function 'setupRouter' is too long"
 
     # Exclude some gosec messages project-wide
     - linters:

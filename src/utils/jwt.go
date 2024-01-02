@@ -7,12 +7,16 @@ import (
 )
 
 type TokenClaims struct {
-	Role string `json:"role"`
+	Role     string `json:"role"`
+	Username string `json:"username"`
+	Id       int    `json:"id"`
 	jwt.RegisteredClaims
 }
 
 type GenerateJWTParams struct {
 	Role       string
+	Username   string
+	Id         int
 	Expiration time.Duration
 }
 
@@ -30,6 +34,8 @@ func GenerateJWT(params GenerateJWTParams) (string, error) {
 
 	claims := TokenClaims{
 		params.Role,
+		params.Username,
+		params.Id,
 		jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expirationTime)),

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	validator "github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -101,4 +102,42 @@ func UploadAvatarImage(ginCtx *gin.Context) {
 		return
 	}
 	ginCtx.JSON(http.StatusCreated, map[string]interface{}{"avatarImageURL": imageURL})
+}
+
+func EditUserData(ginCtx *gin.Context) {
+	username, ok := ginCtx.Params.Get("username")
+
+	if !ok {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"errors": "username was not found"})
+		return
+	}
+
+	data := users.User{}
+
+	if err := ginCtx.ShouldBind(&data); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "invalid parameters"})
+		return
+	}
+
+	if _, err := validator.ValidateStruct(data); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
+		return
+	}
+
+	userData, err := users.EditData(username, data)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "no such user"})
+			return
+		}
+
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Errorf("Error on edit attempt for user %s", username)
+
+		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+	ginCtx.JSON(http.StatusOK, userData)
 }

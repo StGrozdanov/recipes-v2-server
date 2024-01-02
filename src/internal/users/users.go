@@ -70,3 +70,15 @@ func UploadAvatarImage(file *multipart.FileHeader, fileKey, username string) (im
 	)
 	return
 }
+
+// EditData uploads a new avatar image for the user
+func EditData(oldUsername string, data User) (response User, err error) {
+	err = database.GetSingleRecordNamedQuery(
+		&response,
+		`UPDATE users SET username = :username, email = :email 
+             	WHERE username = :old_username 
+             	RETURNING username, email, avatar_url, cover_photo_url;`,
+		map[string]interface{}{"username": data.Username, "email": data.Email, "old_username": oldUsername},
+	)
+	return
+}

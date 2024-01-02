@@ -53,6 +53,12 @@ func setupRouter() (router *gin.Engine) {
 		}
 	}
 
+	resourceOwnerGroup := router.Group("")
+	resourceOwnerGroup.Use(middlewares.ResourceOwnerMiddleware())
+	{
+		resourceOwnerGroup.PATCH("/users/:username", handlers.EditUserData)
+	}
+
 	return
 }
 

@@ -11,9 +11,9 @@ type OwnerData struct {
 }
 
 type User struct {
-	Username            string `json:"username" db:"username"`
+	Username            string `json:"username" db:"username" valid:"required,minstringlength(3)"`
 	AvatarURL           string `json:"avatarURL" db:"avatar_url"`
 	CoverPhotoURL       string `json:"coverPhotoURL" db:"cover_photo_url"`
-	Email               string `json:"email" db:"email"`
+	Email               string `json:"email" db:"email" valid:"required,email"`
 	CreatedRecipesCount int    `json:"createdRecipesCount" db:"created_recipes_count"`
 }
