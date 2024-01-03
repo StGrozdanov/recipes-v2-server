@@ -42,3 +42,8 @@ type RecipeData struct {
 	Protein         int            `db:"protein" json:"protein"`
 	users.OwnerData `json:"owner"`
 }
+
+type FavouritesRequest struct {
+	RecipeName string `json:"recipeName" db:"recipe_name" valid:"required"`
+	UserId     int    `json:"userId" db:"user_id" valid:"required"`
+}

@@ -152,3 +152,45 @@ func GetFavourites(username string) (recipes []BaseRecipeInfo, err error) {
 	)
 	return
 }
+
+// IsInFavourites checks if recipe is in user favourites and returns a boolean value
+func IsInFavourites(data FavouritesRequest) (isInFavourites bool, err error) {
+	err = database.GetSingleRecordNamedQuery(
+		&isInFavourites,
+		`SELECT EXISTS(SELECT recipe_name
+              FROM recipes
+                       JOIN users_favourites
+                            ON recipes.id = users_favourites.favourites_id
+                                AND users_favourites.user_entity_id = :user_id
+              WHERE recipe_name = :recipe_name);`,
+		data,
+	)
+	return
+}
+
+// AddToFavourites adds and recipe to the user favourites collection
+func AddToFavourites(data FavouritesRequest) (err error) {
+	_, err = database.ExecuteNamedQuery(
+		`WITH recipes AS (SELECT id FROM recipes WHERE recipe_name = :recipe_name)
+				
+				INSERT
+				INTO users_favourites(user_entity_id, favourites_id)
+				VALUES (:user_id, (SELECT recipes.id FROM recipes));`,
+		data,
+	)
+	return
+}
+
+// RemoveFromFavourites removes a recipe from user favourites collection
+func RemoveFromFavourites(data FavouritesRequest) (err error) {
+	_, err = database.ExecuteNamedQuery(
+		`WITH recipes AS (SELECT id FROM recipes WHERE recipe_name = :recipe_name)
+
+				DELETE
+				FROM users_favourites
+				WHERE user_entity_id = :user_id
+				  AND favourites_id = (SELECT id FROM recipes);`,
+		data,
+	)
+	return
+}

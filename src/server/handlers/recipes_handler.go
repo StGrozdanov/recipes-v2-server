@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	validator "github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -199,4 +200,70 @@ func GetUserFavouriteRecipes(ginCtx *gin.Context) {
 		return
 	}
 	ginCtx.JSON(http.StatusOK, recipesResults)
+}
+
+func CheckIfRecipeIsInFavourites(ginCtx *gin.Context) {
+	data := recipes.FavouritesRequest{}
+
+	if err := ginCtx.ShouldBind(&data); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "invalid parameters"})
+		return
+	}
+
+	if _, err := validator.ValidateStruct(data); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
+		return
+	}
+
+	isInFavourites, err := recipes.IsInFavourites(data)
+	if err != nil {
+		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+
+	ginCtx.JSON(http.StatusOK, isInFavourites)
+}
+
+func AddToFavourites(ginCtx *gin.Context) {
+	data := recipes.FavouritesRequest{}
+
+	if err := ginCtx.ShouldBind(&data); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "invalid parameters"})
+		return
+	}
+
+	if _, err := validator.ValidateStruct(data); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
+		return
+	}
+
+	err := recipes.AddToFavourites(data)
+	if err != nil {
+		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+
+	ginCtx.JSON(http.StatusOK, map[string]interface{}{"success": true})
+}
+
+func RemoveFromFavourites(ginCtx *gin.Context) {
+	data := recipes.FavouritesRequest{}
+
+	if err := ginCtx.ShouldBind(&data); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "invalid parameters"})
+		return
+	}
+
+	if _, err := validator.ValidateStruct(data); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
+		return
+	}
+
+	err := recipes.RemoveFromFavourites(data)
+	if err != nil {
+		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+
+	ginCtx.JSON(http.StatusOK, map[string]interface{}{"success": true})
 }
