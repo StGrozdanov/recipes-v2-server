@@ -6,8 +6,8 @@ type BaseUserData struct {
 }
 
 type OwnerData struct {
-	Username string `db:"owner_name" json:"username" `
-	Id       int    `db:"ownerid" json:"id"`
+	Username string `db:"owner_name" json:"username" valid:"required"`
+	Id       int    `db:"owner_id" json:"id" valid:"required"`
 }
 
 type User struct {

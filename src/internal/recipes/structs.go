@@ -1,7 +1,7 @@
 package recipes
 
 import (
-	"github.com/lib/pq"
+	"encoding/json"
 	"recipes-v2-server/internal/users"
 )
 
@@ -31,15 +31,16 @@ type PageData struct {
 }
 
 type RecipeData struct {
-	RecipeName      string         `db:"recipe_name" json:"recipeName"`
-	Products        pq.StringArray `db:"products" json:"products"`
-	Steps           pq.StringArray `db:"steps" json:"steps"`
-	ImageURL        string         `db:"image_url" json:"imageURL"`
-	CategoryName    string         `db:"category" json:"category"`
-	Difficulty      string         `db:"difficulty" json:"difficulty"`
-	PreparationTime int            `db:"preparation_time" json:"preparationTime"`
-	Calories        int            `db:"calories" json:"calories"`
-	Protein         int            `db:"protein" json:"protein"`
+	RecipeName      string          `db:"recipe_name" json:"recipeName" valid:"required,minstringlength(4)"`
+	Products        json.RawMessage `db:"products" json:"products" valid:"required"`
+	Steps           json.RawMessage `db:"steps" json:"steps" valid:"required"`
+	ImageURL        string          `db:"image_url" json:"imageURL" valid:"required,url"`
+	CategoryName    string          `db:"category" json:"category" valid:"required"`
+	Difficulty      string          `db:"difficulty" json:"difficulty" valid:"required"`
+	PreparationTime int             `db:"preparation_time" json:"preparationTime" valid:"required"`
+	Calories        int             `db:"calories" json:"calories" valid:"required"`
+	Protein         int             `db:"protein" json:"protein" valid:"required"`
+	Status          string          `db:"status" json:"-"`
 	users.OwnerData `json:"owner"`
 }
 

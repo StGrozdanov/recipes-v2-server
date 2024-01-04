@@ -1,7 +1,9 @@
 package recipes
 
 import (
+	"errors"
 	"recipes-v2-server/database"
+	"recipes-v2-server/utils"
 )
 
 // GetAll gets the recipes in a pageable way
@@ -93,28 +95,18 @@ func SearchByCategory(query string) (recipes []BaseRecipeInfo, err error) {
 func GetASingleRecipe(recipeName string) (recipe RecipeData, err error) {
 	err = database.GetSingleRecordNamedQuery(
 		&recipe,
-		`WITH steps_results AS (SELECT ARRAY_AGG(steps) AS steps
-                       FROM recipe_entity_steps
-                       WHERE recipe_entity_id = (SELECT id FROM recipes WHERE recipe_name = :recipe_name)),
-
-					 products_results AS (SELECT ARRAY_AGG(products) AS products
-										  FROM recipe_entity_products
-										  WHERE recipe_entity_id = (SELECT id FROM recipes WHERE recipe_name = :recipe_name))
-				
-				SELECT recipe_name,
+		`SELECT recipe_name,
 					   image_url,
 					   COALESCE(calories, 0)                   AS calories,
 					   preparation_time,
 					   COALESCE(protein, 0)                    AS protein,
 					   difficulty,
-					   (SELECT steps FROM steps_results)       AS steps,
-					   (SELECT products FROM products_results) AS products,
+					   steps,
+					   products,
 					   category,
 					   users.id                                AS ownerId,
 					   users.username                          AS owner_name
 				FROM recipes
-						 LEFT JOIN recipe_entity_products ON recipes.id = recipe_entity_products.recipe_entity_id
-						 LEFT JOIN recipe_entity_steps ON recipes.id = recipe_entity_steps.recipe_entity_id
 						 LEFT JOIN users ON users.id = recipes.owner_id
 				WHERE recipe_name = :recipe_name;`,
 		map[string]interface{}{"recipe_name": recipeName},
@@ -193,4 +185,73 @@ func RemoveFromFavourites(data FavouritesRequest) (err error) {
 		data,
 	)
 	return
+}
+
+// Create creates a new recipe
+func Create(recipe RecipeData, authToken string) (response RecipeData, err error) {
+	recipe, err = adjustRecipeStatus(recipe, authToken)
+	if err != nil {
+		return
+	}
+
+	err = database.GetSingleRecordNamedQuery(
+		&response,
+		`INSERT INTO recipes (category,
+                     created_at,
+                     image_url,
+                     owner_id,
+                     recipe_name,
+                     status,
+                     visitations_count,
+                     calories,
+                     protein,
+                     preparation_time,
+                     difficulty,
+                     steps,
+                     products)
+				VALUES (:category,
+						NOW(),
+						:image_url,
+						:owner_id,
+						:recipe_name,
+						:status,
+						0,
+						:calories,
+						:protein,
+						:preparation_time,
+						:difficulty,
+						:steps,
+						:products)
+				RETURNING recipe_name,
+					image_url,
+					COALESCE(calories, 0) AS calories,
+					preparation_time,
+					COALESCE(protein, 0) AS protein,
+					difficulty,
+					steps,
+					products,
+					category,
+					owner_id;`,
+		recipe,
+	)
+
+	response.OwnerData.Username = recipe.OwnerData.Username
+	return
+}
+
+func adjustRecipeStatus(recipe RecipeData, authToken string) (RecipeData, error) {
+	claims, isValid, err := utils.ParseJWT(authToken)
+	if err != nil {
+		return recipe, err
+	}
+	if !isValid {
+		return recipe, errors.New("invalid token")
+	}
+
+	if claims.Role == "ADMINISTRATOR" || claims.Role == "MODERATOR" {
+		recipe.Status = "APPROVED"
+	} else {
+		recipe.Status = "PENDING"
+	}
+	return recipe, nil
 }

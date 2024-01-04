@@ -217,6 +217,11 @@ func CheckIfRecipeIsInFavourites(ginCtx *gin.Context) {
 
 	isInFavourites, err := recipes.IsInFavourites(data)
 	if err != nil {
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Error("Error on getting the recipes from the database")
+
 		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
 		return
 	}
@@ -239,6 +244,11 @@ func AddToFavourites(ginCtx *gin.Context) {
 
 	err := recipes.AddToFavourites(data)
 	if err != nil {
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Error("Error on getting the recipes from the database")
+
 		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
 		return
 	}
@@ -261,9 +271,43 @@ func RemoveFromFavourites(ginCtx *gin.Context) {
 
 	err := recipes.RemoveFromFavourites(data)
 	if err != nil {
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Error("Error on getting the recipes from the database")
+
 		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
 		return
 	}
 
 	ginCtx.JSON(http.StatusOK, map[string]interface{}{"success": true})
+}
+
+func CreateRecipe(ginCtx *gin.Context) {
+	recipe := recipes.RecipeData{}
+
+	if err := ginCtx.ShouldBind(&recipe); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "invalid parameters"})
+		return
+	}
+
+	if _, err := validator.ValidateStruct(recipe); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
+		return
+	}
+
+	authToken := ginCtx.Request.Header["X-Authorization"][0]
+
+	recipeData, err := recipes.Create(recipe, authToken)
+	if err != nil {
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Error("Error on getting the recipes from the database")
+
+		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+
+	ginCtx.JSON(http.StatusOK, recipeData)
 }
