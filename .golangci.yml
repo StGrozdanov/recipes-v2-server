@@ -9,7 +9,7 @@ issues:
       linters:
         - revive
     - path: server/server.go
-      text: "Function 'setupRouter' is too long"
+      text: "Function 'setupRouter'"
 
     # Exclude some gosec messages project-wide
     - linters:

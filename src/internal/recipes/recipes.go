@@ -1,7 +1,9 @@
 package recipes
 
 import (
+	"bytes"
 	"errors"
+	"mime/multipart"
 	"recipes-v2-server/database"
 	"recipes-v2-server/utils"
 )
@@ -254,4 +256,32 @@ func adjustRecipeStatus(recipe RecipeData, authToken string) (RecipeData, error)
 		recipe.Status = "PENDING"
 	}
 	return recipe, nil
+}
+
+// RecipeNameExists checks for existing recipe with this name and returns boolean value
+func RecipeNameExists(recipeName string) (exists bool, err error) {
+	err = database.GetSingleRecordNamedQuery(
+		&exists,
+		`SELECT EXISTS(SELECT id FROM recipes WHERE recipe_name = :recipe_name);`,
+		map[string]interface{}{"recipe_name": recipeName},
+	)
+	return
+}
+
+// UploadRecipeImage Uploads recipe image to s3 bucket and returns the URL
+func UploadRecipeImage(file *multipart.FileHeader, fileKey string) (imageURL string, err error) {
+	contentType := file.Header.Get("Content-Type")
+
+	fileContent, _ := file.Open()
+	buffer := make([]byte, file.Size)
+	_, _ = fileContent.Read(buffer)
+	fileBytes := bytes.NewReader(buffer)
+
+	err = utils.UploadToS3(fileBytes, fileKey, contentType)
+	if err != nil {
+		return
+	}
+
+	imageURL = utils.GetTheFullS3BucketURL() + "/" + fileKey
+	return
 }

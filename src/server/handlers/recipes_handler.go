@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	validator "github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -285,8 +286,10 @@ func RemoveFromFavourites(ginCtx *gin.Context) {
 
 func CreateRecipe(ginCtx *gin.Context) {
 	recipe := recipes.RecipeData{}
+	fmt.Println(recipe)
 
 	if err := ginCtx.ShouldBind(&recipe); err != nil {
+		fmt.Println(err)
 		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "invalid parameters"})
 		return
 	}
@@ -310,4 +313,64 @@ func CreateRecipe(ginCtx *gin.Context) {
 	}
 
 	ginCtx.JSON(http.StatusOK, recipeData)
+}
+
+func CheckRecipeName(ginCtx *gin.Context) {
+	request := recipes.BaseRecipeInfo{}
+
+	if err := ginCtx.ShouldBind(&request); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "invalid request"})
+		return
+	}
+
+	if _, err := validator.ValidateStruct(request); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
+		return
+	}
+
+	isAvailable, err := recipes.RecipeNameExists(request.RecipeName)
+	if err != nil {
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Error("Error on checking for recipe name")
+
+		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+	ginCtx.JSON(http.StatusOK, isAvailable)
+}
+
+func UploadRecipeImage(ginCtx *gin.Context) {
+	recipeName, found := ginCtx.GetPostForm("recipeName")
+	if !found {
+		ginCtx.JSON(
+			http.StatusBadRequest,
+			map[string]interface{}{"error": "invalid parameters, expected recipeName to be present in the form data"},
+		)
+		return
+	}
+
+	imageKey := fmt.Sprintf("recipe-image-%s", recipeName)
+
+	recipeImage, err := ginCtx.FormFile(imageKey)
+	if err != nil {
+		ginCtx.JSON(
+			http.StatusBadRequest,
+			map[string]interface{}{"error": fmt.Sprintf("the expected key - %s was not found in the form data", imageKey)},
+		)
+		return
+	}
+
+	imageURL, err := recipes.UploadRecipeImage(recipeImage, imageKey)
+	if err != nil {
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Error("Error on attempting to upload recipe image")
+
+		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+	ginCtx.JSON(http.StatusCreated, map[string]interface{}{"imageURL": imageURL})
 }

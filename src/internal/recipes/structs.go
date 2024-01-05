@@ -13,7 +13,7 @@ type ExtendedRecipeInfo struct {
 
 type BaseRecipeInfo struct {
 	ImageURL   string `json:"imageURL" db:"image_url"`
-	RecipeName string `json:"recipeName" db:"recipe_name"`
+	RecipeName string `json:"recipeName" db:"recipe_name" valid:"required"`
 }
 
 type BaseRecipeInfoArray = []BaseRecipeInfo
@@ -38,8 +38,8 @@ type RecipeData struct {
 	CategoryName    string          `db:"category" json:"category" valid:"required"`
 	Difficulty      string          `db:"difficulty" json:"difficulty" valid:"required"`
 	PreparationTime int             `db:"preparation_time" json:"preparationTime" valid:"required"`
-	Calories        int             `db:"calories" json:"calories" valid:"required"`
-	Protein         int             `db:"protein" json:"protein" valid:"required"`
+	Calories        int             `db:"calories" json:"calories"`
+	Protein         int             `db:"protein" json:"protein"`
 	Status          string          `db:"status" json:"-"`
 	users.OwnerData `json:"owner"`
 }

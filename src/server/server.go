@@ -26,6 +26,7 @@ func setupRouter() (router *gin.Engine) {
 	router.GET("/recipes/user/:username", handlers.GetRecipesByUser)
 	router.GET("/recipes/favourites/:username", handlers.GetUserFavouriteRecipes)
 	router.POST("/recipes/is-favourite", handlers.CheckIfRecipeIsInFavourites)
+	router.POST("/recipes/check-name", handlers.CheckRecipeName)
 
 	router.GET("/users/:username", handlers.GetUser)
 
@@ -49,6 +50,7 @@ func setupRouter() (router *gin.Engine) {
 		authGroup.POST("/recipes/add-to-favourites", handlers.AddToFavourites)
 		authGroup.DELETE("/recipes/remove-from-favourites", handlers.RemoveFromFavourites)
 		authGroup.POST("/recipes", handlers.CreateRecipe)
+		authGroup.POST("/recipes/upload-image", handlers.UploadRecipeImage)
 
 		imageUploadGroup := authGroup.Group("/upload/image/users")
 		imageUploadGroup.Use(middlewares.ImageContentTypeMiddleware())
