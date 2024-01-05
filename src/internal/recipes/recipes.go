@@ -115,7 +115,7 @@ func GetASingleRecipe(recipeName string) (recipe RecipeData, err error) {
 					   steps,
 					   products,
 					   category,
-					   users.id                                AS ownerId,
+					   users.id                                AS owner_id,
 					   users.username                          AS owner_name
 				FROM recipes
 						 LEFT JOIN users ON users.id = recipes.owner_id
