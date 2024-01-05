@@ -20,6 +20,15 @@ func GetAll(limit, cursor int) (recipes RecipePaginationInfo, err error) {
 				LIMIT :limit;`,
 		map[string]interface{}{"limit": limit, "cursor": cursor},
 	)
+	if err != nil {
+		return
+	}
+
+	var totalRecipesCount int
+	err = database.GetSingleRecord(&totalRecipesCount, `SELECT COUNT(id) FROM recipes;`)
+	if err != nil {
+		return
+	}
 
 	if cursor == 0 || cursor-limit < 0 {
 		recipes.PageData.PrevPage = 0
@@ -29,7 +38,7 @@ func GetAll(limit, cursor int) (recipes RecipePaginationInfo, err error) {
 
 	recipes.PageData.NextPage = limit + cursor
 	recipes.PageData.FirstPage = cursor == 0
-	recipes.PageData.LastPage = len(recipes.BaseRecipeInfoArray) < limit
+	recipes.PageData.LastPage = limit+cursor >= totalRecipesCount
 
 	return
 }
