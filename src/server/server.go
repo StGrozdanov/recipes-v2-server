@@ -64,6 +64,7 @@ func setupRouter() (router *gin.Engine) {
 	resourceOwnerGroup.Use(middlewares.ResourceOwnerMiddleware())
 	{
 		resourceOwnerGroup.PATCH("/users/:username", handlers.EditUserData)
+		resourceOwnerGroup.PUT("/recipes/:name", handlers.EditRecipe)
 	}
 
 	return

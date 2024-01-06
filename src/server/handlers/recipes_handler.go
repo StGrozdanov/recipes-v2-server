@@ -374,3 +374,41 @@ func UploadRecipeImage(ginCtx *gin.Context) {
 	}
 	ginCtx.JSON(http.StatusCreated, map[string]interface{}{"imageURL": imageURL})
 }
+
+func EditRecipe(ginCtx *gin.Context) {
+	recipeName, ok := ginCtx.Params.Get("name")
+
+	if !ok {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"errors": "recipe name was not found"})
+		return
+	}
+
+	data := recipes.RecipeData{}
+
+	if err := ginCtx.ShouldBind(&data); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "invalid parameters"})
+		return
+	}
+
+	if _, err := validator.ValidateStruct(data); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
+		return
+	}
+
+	recipeData, err := recipes.Edit(recipeName, data)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "no such recipe"})
+			return
+		}
+
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Errorf("Error on edit attempt for recipe %s", recipeName)
+
+		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+	ginCtx.JSON(http.StatusOK, recipeData)
+}

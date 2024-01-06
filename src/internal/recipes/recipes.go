@@ -294,3 +294,27 @@ func UploadRecipeImage(file *multipart.FileHeader, fileKey string) (imageURL str
 	imageURL = utils.GetTheFullS3BucketURL() + "/" + fileKey
 	return
 }
+
+// Edit edits a recipe
+func Edit(recipeName string, data RecipeData) (result RecipeData, err error) {
+	extendedData := ExtendedRecipeData{data, recipeName}
+
+	err = database.GetSingleRecordNamedQuery(
+		&result,
+		`UPDATE recipes
+				SET recipe_name      = :recipe_name,
+					preparation_time = :preparation_time,
+					category         = :category,
+					image_url        = :image_url,
+					owner_id         = :owner_id,
+					calories         = :calories,
+					protein          = :protein,
+					difficulty       = :difficulty,
+					steps            = :steps,
+					products         = :products
+				WHERE recipe_name = :old_recipe_name
+				RETURNING *`,
+		extendedData,
+	)
+	return
+}

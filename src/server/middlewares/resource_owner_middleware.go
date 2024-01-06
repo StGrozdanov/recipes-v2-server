@@ -60,7 +60,7 @@ func validateRecipeEditRequest(claims *utils.TokenClaims, recipeName string) (va
 
 	err := database.GetSingleRecordNamedQuery(
 		&ownerId,
-		`SELECT owner_id FROM recipes WHERE recipes.name = :recipe_name`,
+		`SELECT owner_id FROM recipes WHERE recipe_name = :recipe_name`,
 		map[string]interface{}{"recipe_name": recipeName},
 	)
 	if err != nil {

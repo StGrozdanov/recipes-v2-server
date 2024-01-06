@@ -48,3 +48,8 @@ type FavouritesRequest struct {
 	RecipeName string `json:"recipeName" db:"recipe_name" valid:"required"`
 	UserId     int    `json:"userId" db:"user_id" valid:"required"`
 }
+
+type ExtendedRecipeData struct {
+	RecipeData
+	OriginalRecipeName string `db:"old_recipe_name"`
+}
