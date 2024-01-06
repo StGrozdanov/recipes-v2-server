@@ -52,6 +52,8 @@ func setupRouter() (router *gin.Engine) {
 		authGroup.POST("/recipes", handlers.CreateRecipe)
 		authGroup.POST("/recipes/upload-image", handlers.UploadRecipeImage)
 
+		authGroup.POST("/comments", handlers.CreateComment)
+		
 		imageUploadGroup := authGroup.Group("/upload/image/users")
 		imageUploadGroup.Use(middlewares.ImageContentTypeMiddleware())
 		{
@@ -66,6 +68,8 @@ func setupRouter() (router *gin.Engine) {
 		resourceOwnerGroup.PATCH("/users/:username", handlers.EditUserData)
 		resourceOwnerGroup.PUT("/recipes/:name", handlers.EditRecipe)
 		resourceOwnerGroup.DELETE("/recipes/:name", handlers.DeleteRecipe)
+		resourceOwnerGroup.PUT("/comments", handlers.EditComment)
+		resourceOwnerGroup.DELETE("/comments/:id", handlers.DeleteComment)
 	}
 
 	return

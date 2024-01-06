@@ -9,5 +9,12 @@ type Comment struct {
 	Content            string    `json:"content" db:"content"`
 	CreatedAt          time.Time `json:"createdAt" db:"created_at"`
 	RecipeName         string    `json:"recipeName" db:"recipe_name"`
+	Id                 int       `json:"id" db:"id"`
 	users.BaseUserData `json:"owner"`
+}
+
+type CommentData struct {
+	Content         string `json:"content" db:"content" valid:"required"`
+	RecipeName      string `json:"recipeName" db:"recipe_name" valid:"required"`
+	users.OwnerData `json:"owner"`
 }
