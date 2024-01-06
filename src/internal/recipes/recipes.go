@@ -321,14 +321,23 @@ func Edit(recipeName string, data RecipeData) (result RecipeData, err error) {
 
 // Delete deletes a recipe
 func Delete(recipeName string) (err error) {
-	_, err = database.ExecuteNamedQuery(
+	var oldImageURL string
+
+	err = database.GetSingleRecordNamedQuery(
+		&oldImageURL,
 		`WITH recipe AS (SELECT id FROM recipes WHERE recipe_name = :recipe_name),
 					 delete_favourites AS (DELETE FROM users_favourites WHERE favourites_id = (SELECT recipe.id FROM recipe))
 				
 				DELETE
 				FROM recipes
-				WHERE recipe_name = :recipe_name;`,
+				WHERE recipe_name = :recipe_name
+				RETURNING recipes.image_url;`,
 		map[string]interface{}{"recipe_name": recipeName},
 	)
+	if err != nil {
+		return
+	}
+
+	err = utils.DeleteFromS3(oldImageURL)
 	return
 }
