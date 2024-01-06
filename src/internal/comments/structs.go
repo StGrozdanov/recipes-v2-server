@@ -18,3 +18,12 @@ type CommentData struct {
 	RecipeName      string `json:"recipeName" db:"recipe_name" valid:"required"`
 	users.OwnerData `json:"owner"`
 }
+
+type CommentIdData struct {
+	Id int `json:"id" db:"id" valid:"required"`
+}
+
+type CommentEditData struct {
+	CommentIdData
+	Content string `json:"content" db:"content" valid:"required"`
+}

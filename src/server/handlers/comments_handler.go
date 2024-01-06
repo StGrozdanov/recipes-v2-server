@@ -55,19 +55,20 @@ func GetRecipeComments(ginCtx *gin.Context) {
 }
 
 func EditComment(ginCtx *gin.Context) {
-	data := comments.CommentData{}
+	dataFromContext, ok := ginCtx.Get("commentData")
 
-	if err := ginCtx.ShouldBind(&data); err != nil {
-		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "invalid parameters"})
+	if !ok {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "missing parameters"})
 		return
 	}
 
-	if _, err := validator.ValidateStruct(data); err != nil {
-		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
+	parsedCommentData, ok := dataFromContext.(comments.CommentEditData)
+	if !ok {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "invalid comment data type"})
 		return
 	}
 
-	commentData, err := comments.Edit(data)
+	commentData, err := comments.Edit(parsedCommentData)
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
 			ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "no such comment"})
@@ -77,7 +78,7 @@ func EditComment(ginCtx *gin.Context) {
 		utils.
 			GetLogger().
 			WithFields(log.Fields{"error": err.Error()}).
-			Errorf("Error on edit attempt for comment with id: %d", data.Id)
+			Errorf("Error on edit attempt for comment with id: %d", parsedCommentData.Id)
 
 		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
 		return
@@ -86,14 +87,20 @@ func EditComment(ginCtx *gin.Context) {
 }
 
 func DeleteComment(ginCtx *gin.Context) {
-	id, ok := ginCtx.Params.Get("id")
+	dataFromContext, ok := ginCtx.Get("commentData")
 
 	if !ok {
-		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"errors": "comment id was not found"})
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "missing parameters"})
 		return
 	}
 
-	err := comments.Delete(id)
+	commentData, ok := dataFromContext.(comments.CommentIdData)
+	if !ok {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "invalid comment data type"})
+		return
+	}
+
+	err := comments.Delete(commentData.Id)
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
 			ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "no such comment"})
@@ -103,7 +110,7 @@ func DeleteComment(ginCtx *gin.Context) {
 		utils.
 			GetLogger().
 			WithFields(log.Fields{"error": err.Error()}).
-			Errorf("Error on delete attempt for comment with id: %s", id)
+			Errorf("Error on delete attempt for comment with id: %d", commentData.Id)
 
 		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
 		return

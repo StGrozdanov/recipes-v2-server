@@ -44,7 +44,7 @@ func GetCommentsForRecipe(recipeName string) (comments []Comment, err error) {
 }
 
 // Edit edits a comment
-func Edit(data CommentData) (result Comment, err error) {
+func Edit(data CommentEditData) (result Comment, err error) {
 	err = database.GetSingleRecordNamedQuery(
 		&result,
 		`UPDATE comments SET content = :content WHERE id = :id
@@ -55,7 +55,7 @@ func Edit(data CommentData) (result Comment, err error) {
 }
 
 // Delete deletes a comment
-func Delete(id string) (err error) {
+func Delete(id int) (err error) {
 	_, err = database.ExecuteNamedQuery(
 		`DELETE
 				FROM comments
