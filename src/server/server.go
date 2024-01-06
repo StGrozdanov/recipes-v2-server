@@ -65,6 +65,7 @@ func setupRouter() (router *gin.Engine) {
 	{
 		resourceOwnerGroup.PATCH("/users/:username", handlers.EditUserData)
 		resourceOwnerGroup.PUT("/recipes/:name", handlers.EditRecipe)
+		resourceOwnerGroup.DELETE("/recipes/:name", handlers.DeleteRecipe)
 	}
 
 	return

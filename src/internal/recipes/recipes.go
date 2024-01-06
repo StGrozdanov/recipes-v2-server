@@ -318,3 +318,17 @@ func Edit(recipeName string, data RecipeData) (result RecipeData, err error) {
 	)
 	return
 }
+
+// Delete deletes a recipe
+func Delete(recipeName string) (err error) {
+	_, err = database.ExecuteNamedQuery(
+		`WITH recipe AS (SELECT id FROM recipes WHERE recipe_name = :recipe_name),
+					 delete_favourites AS (DELETE FROM users_favourites WHERE favourites_id = (SELECT recipe.id FROM recipe))
+				
+				DELETE
+				FROM recipes
+				WHERE recipe_name = :recipe_name;`,
+		map[string]interface{}{"recipe_name": recipeName},
+	)
+	return
+}

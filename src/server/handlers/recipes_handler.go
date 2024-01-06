@@ -412,3 +412,29 @@ func EditRecipe(ginCtx *gin.Context) {
 	}
 	ginCtx.JSON(http.StatusOK, recipeData)
 }
+
+func DeleteRecipe(ginCtx *gin.Context) {
+	recipeName, ok := ginCtx.Params.Get("name")
+
+	if !ok {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"errors": "recipe name was not found"})
+		return
+	}
+
+	err := recipes.Delete(recipeName)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "no such recipe"})
+			return
+		}
+
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Errorf("Error on delete attempt for recipe %s", recipeName)
+
+		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+	ginCtx.JSON(http.StatusOK, map[string]interface{}{"status": "success"})
+}
