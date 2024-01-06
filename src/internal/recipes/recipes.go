@@ -326,7 +326,8 @@ func Delete(recipeName string) (err error) {
 	err = database.GetSingleRecordNamedQuery(
 		&oldImageURL,
 		`WITH recipe AS (SELECT id FROM recipes WHERE recipe_name = :recipe_name),
-					 delete_favourites AS (DELETE FROM users_favourites WHERE favourites_id = (SELECT recipe.id FROM recipe))
+					 delete_favourites AS (DELETE FROM users_favourites WHERE favourites_id = (SELECT recipe.id FROM recipe)),
+     				 delete_comments AS (DELETE FROM comments WHERE target_recipe_id = (SELECT recipe.id FROM recipe))
 				
 				DELETE
 				FROM recipes
