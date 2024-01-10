@@ -14,6 +14,8 @@ func setupRouter() (router *gin.Engine) {
 
 	router.Use(middlewares.Logger(utils.GetLogger()), gin.Recovery())
 	router.Use(middlewares.CORS())
+	router.Use(middlewares.TrackVisitations())
+	router.Use(middlewares.FilterBlockedUsers())
 
 	router.GET("/healths", handlers.HealthCheck)
 	router.GET("/metrics", handlers.Metrics)

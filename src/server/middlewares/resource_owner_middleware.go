@@ -10,6 +10,15 @@ import (
 	"strings"
 )
 
+type Info struct {
+	Message string `json:"message"`
+	Cause   string `json:"cause"`
+}
+
+type Errors struct {
+	Info `json:"error"`
+}
+
 // ResourceOwnerMiddleware checks if the request comes from the resource owner or ADMINISTRATOR and only then
 // the request is authorized
 func ResourceOwnerMiddleware() gin.HandlerFunc {
@@ -21,15 +30,14 @@ func ResourceOwnerMiddleware() gin.HandlerFunc {
 
 		token := ctx.Request.Header["X-Authorization"][0]
 
-		_, isValid, err := utils.ParseJWT(token)
-		if err != nil || !isValid {
-			ctx.AbortWithStatusJSON(http.StatusForbidden, map[string]interface{}{"message": "Invalid token"})
-			return
-		}
-
 		claims, isValid, err := utils.ParseJWT(token)
 		if err != nil || !isValid {
-			ctx.AbortWithStatusJSON(http.StatusForbidden, map[string]interface{}{"message": "Invalid token"})
+			ctx.AbortWithStatusJSON(http.StatusForbidden, Errors{
+				Info: Info{
+					Message: "Invalid Token",
+					Cause:   "Auth Token",
+				},
+			})
 			return
 		}
 
@@ -38,7 +46,7 @@ func ResourceOwnerMiddleware() gin.HandlerFunc {
 		isCommentsRelated := strings.Contains(ctx.Request.URL.String(), "/comments")
 
 		if !isUsersRelated && !isRecipesRelated && !isCommentsRelated {
-			ctx.AbortWithStatusJSON(http.StatusForbidden, map[string]interface{}{"message": "Missing request identifier"})
+			ctx.AbortWithStatusJSON(http.StatusForbidden, Errors{Info: Info{Message: "Missing identifier", Cause: "Failed to identify resource"}})
 			return
 		}
 
@@ -53,7 +61,7 @@ func ResourceOwnerMiddleware() gin.HandlerFunc {
 		}
 
 		if !permissionsAreValid {
-			ctx.AbortWithStatusJSON(http.StatusForbidden, map[string]interface{}{"message": "Missing permissions to access this resource"})
+			ctx.AbortWithStatusJSON(http.StatusForbidden, Errors{Info: Info{Message: "You don't have permissions to access this resource", Cause: "Missing permissions"}})
 			return
 		}
 

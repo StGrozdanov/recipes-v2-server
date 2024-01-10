@@ -18,7 +18,12 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		_, isValid, err := utils.ParseJWT(token)
 		if err != nil || !isValid {
-			ctx.AbortWithStatusJSON(http.StatusForbidden, map[string]interface{}{"message": "Invalid token"})
+			ctx.AbortWithStatusJSON(http.StatusForbidden, Errors{
+				Info: Info{
+					Message: "Invalid Token",
+					Cause:   "Auth token",
+				},
+			})
 			return
 		}
 
