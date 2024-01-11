@@ -65,3 +65,34 @@ func MarkNotificationAsRead(ginCtx *gin.Context) {
 	}
 	ginCtx.JSON(http.StatusOK, map[string]interface{}{"status": "success"})
 }
+
+func CreateNotifications(ginCtx *gin.Context) {
+	request := notifications.NotificationRequest{}
+
+	if err := ginCtx.ShouldBind(&request); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "invalid parameters"})
+		return
+	}
+
+	if _, err := validator.ValidateStruct(request); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, map[string]interface{}{"errors": err.Error()})
+		return
+	}
+
+	err := notifications.Create(request)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			ginCtx.JSON(http.StatusOK, map[string]interface{}{})
+			return
+		}
+
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error(), "request": request}).
+			Error("Error on creating notification")
+
+		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+	ginCtx.JSON(http.StatusOK, map[string]interface{}{"status": "success"})
+}

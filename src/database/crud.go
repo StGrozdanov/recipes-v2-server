@@ -70,3 +70,10 @@ func GetMultipleRecordsNamedQuery(destination interface{}, query string, input m
 	outputQuery = instance.DB.Rebind(outputQuery)
 	return instance.DB.Unsafe().SelectContext(ctx, destination, outputQuery, args...)
 }
+
+// PrepareNamedStatement Used to prepare the named statement and return it
+func PrepareNamedStatement(query string) (namedStatement *sqlx.NamedStmt, err error) {
+	var ctx, cancel = context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+	return instance.DB.PrepareNamedContext(ctx, query)
+}

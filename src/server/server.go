@@ -48,6 +48,7 @@ func setupRouter() (router *gin.Engine) {
 	{
 		authGroup.GET("/notifications/:username", handlers.GetNotifications)
 		authGroup.PUT("/notifications", handlers.MarkNotificationAsRead)
+		authGroup.POST("/notifications", handlers.CreateNotifications)
 
 		authGroup.POST("/recipes/add-to-favourites", handlers.AddToFavourites)
 		authGroup.DELETE("/recipes/remove-from-favourites", handlers.RemoveFromFavourites)
