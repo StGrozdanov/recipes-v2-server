@@ -306,7 +306,6 @@ func Edit(recipeName string, data RecipeData) (result RecipeData, err error) {
 					preparation_time = :preparation_time,
 					category         = :category,
 					image_url        = :image_url,
-					owner_id         = :owner_id,
 					calories         = :calories,
 					protein          = :protein,
 					difficulty       = :difficulty,
