@@ -163,7 +163,7 @@ func findDeleteRecipeActionReceivers(request NotificationRequest) (results pq.In
 															 AND users.id != :sender_id)
 			
 			SELECT ARRAY(SELECT id
-						 FROM admin_and_moderator_groups
+						 FROM admin_groups
 			
 						 UNION
 			
