@@ -93,8 +93,8 @@ func findNotificationReceivers(request NotificationRequest) (results pq.Int32Arr
 		"CREATED_RECIPE":  findCreateRecipeActionReceivers,
 		"DELETED_RECIPE":  findDeleteRecipeActionReceivers,
 		"CREATED_COMMENT": findCreateCommentActionReceivers,
-		"EDITED_COMMENT":  findCreateCommentActionReceivers,
-		"DELETED_COMMENT": findEditRecipeActionReceivers,
+		"EDITED_COMMENT":  findDeleteCommentActionReceivers,
+		"DELETED_COMMENT": findDeleteCommentActionReceivers,
 	}
 
 	handlerFunc, found := notificationActionsReceiversMap[request.Action]
@@ -208,6 +208,43 @@ func findCreateCommentActionReceivers(request NotificationRequest) (results pq.I
 				
 							 SELECT owner_id
 							 FROM users_involved_into_the_conversation
+					   ) AS results;`,
+		request,
+	)
+	return
+}
+
+func findDeleteCommentActionReceivers(request NotificationRequest) (results pq.Int32Array, err error) {
+	err = database.GetSingleRecordNamedQuery(
+		&results,
+		`WITH admin_and_moderator_groups AS (SELECT id
+                                    FROM users
+                                             JOIN users_roles ON user_entity_id = users.id
+                                    WHERE roles_id IN (1, 2)
+                                      AND id != :sender_id),
+
+					 resource_owner_that_is_not_the_sender AS (SELECT users.id
+															   FROM users
+																		JOIN recipes ON owner_id = users.id
+															   WHERE recipes.recipe_name = :location_name
+																 AND users.id != :sender_id),
+				
+					 comment_owner_that_is_not_the_sender AS (SELECT users.id
+															  FROM users
+															  WHERE username = :owner_name AND users.id != :sender_id)
+				
+				SELECT ARRAY(SELECT id
+							 FROM admin_and_moderator_groups
+				
+							 UNION
+				
+							 SELECT id
+							 FROM resource_owner_that_is_not_the_sender
+				
+							 UNION
+				
+							 SELECT id
+							 FROM comment_owner_that_is_not_the_sender
 					   ) AS results;`,
 		request,
 	)

@@ -19,4 +19,5 @@ type NotificationRequest struct {
 	SenderId       int    `json:"senderId" db:"sender_id" valid:"required"`
 	Action         string `json:"action" db:"action" valid:"required"`
 	LocationName   string `json:"locationName" db:"location_name" valid:"required"`
+	OwnerName      string `json:"ownerName" db:"owner_name"`
 }
