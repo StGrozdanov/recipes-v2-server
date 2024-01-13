@@ -15,6 +15,7 @@ require (
 	github.com/knadh/koanf/v2 v2.0.1
 	github.com/lib/pq v1.10.9
 	github.com/nleeper/goment v1.4.4
+	github.com/olahol/melody v1.1.4
 	github.com/prometheus/client_golang v1.17.0
 	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/crypto v0.17.0
@@ -33,6 +34,7 @@ require (
 	github.com/go-playground/validator/v10 v10.14.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect

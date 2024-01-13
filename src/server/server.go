@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/olahol/melody"
 	log "github.com/sirupsen/logrus"
 	"recipes-v2-server/server/handlers"
 	"recipes-v2-server/server/middlewares"
@@ -11,6 +12,7 @@ import (
 func setupRouter() (router *gin.Engine) {
 	gin.SetMode(gin.ReleaseMode)
 	router = gin.New()
+	websocket := melody.New()
 
 	router.Use(middlewares.Logger(utils.GetLogger()), gin.Recovery())
 	router.Use(middlewares.CORS())
@@ -43,12 +45,18 @@ func setupRouter() (router *gin.Engine) {
 	router.POST("/auth/verify-code", handlers.VerifyCode)
 	router.POST("/auth/reset-password", handlers.ResetPassword)
 
+	router.GET("/realtime-notifications", func(ctx *gin.Context) {
+		if err := websocket.HandleRequest(ctx.Writer, ctx.Request); err != nil {
+			return
+		}
+		handlers.RealtimeNotifications(websocket)
+	})
+
 	authGroup := router.Group("")
 	authGroup.Use(middlewares.AuthMiddleware())
 	{
 		authGroup.GET("/notifications/:username", handlers.GetNotifications)
 		authGroup.PUT("/notifications", handlers.MarkNotificationAsRead)
-		authGroup.POST("/notifications", handlers.CreateNotifications)
 
 		authGroup.POST("/recipes/add-to-favourites", handlers.AddToFavourites)
 		authGroup.DELETE("/recipes/remove-from-favourites", handlers.RemoveFromFavourites)

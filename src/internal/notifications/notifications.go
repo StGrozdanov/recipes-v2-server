@@ -2,6 +2,7 @@ package notifications
 
 import (
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
 	"recipes-v2-server/database"
@@ -36,7 +37,7 @@ func MarkAsRead(id int) (err error) {
 }
 
 // Create creates a notification to the related receivers
-func Create(request NotificationRequest) (err error) {
+func Create(request NotificationRequest) (receivers []string, err error) {
 	const query = `INSERT INTO notifications (action,
                            created_at,
                            location_id,
@@ -73,6 +74,17 @@ func Create(request NotificationRequest) (err error) {
 		return
 	}
 
+	go insertNotifications(request, receiverIds, queryParams, statement)
+
+	err = database.GetMultipleRecordsNamedQuery(
+		&receivers,
+		`SELECT username FROM users WHERE id = ANY(CAST(:receiver_ids AS int[]))`,
+		map[string]interface{}{"receiver_ids": receiverIds},
+	)
+	return
+}
+
+func insertNotifications(request NotificationRequest, receiverIds pq.Int32Array, queryParams map[string]interface{}, statement *sqlx.NamedStmt) {
 	for _, receiverId := range receiverIds {
 		queryParams["receiver_id"] = receiverId
 
@@ -83,8 +95,6 @@ func Create(request NotificationRequest) (err error) {
 				Error("Error on executing statement for creating notification")
 		}
 	}
-
-	return
 }
 
 func findNotificationReceivers(request NotificationRequest) (results pq.Int32Array, err error) {

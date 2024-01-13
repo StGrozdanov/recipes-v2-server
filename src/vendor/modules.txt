@@ -135,6 +135,9 @@ github.com/golang-jwt/jwt/v5
 # github.com/golang/protobuf v1.5.3
 ## explicit; go 1.9
 github.com/golang/protobuf/proto
+# github.com/gorilla/websocket v1.5.0
+## explicit; go 1.12
+github.com/gorilla/websocket
 # github.com/jmespath/go-jmespath v0.4.0
 ## explicit; go 1.14
 github.com/jmespath/go-jmespath
@@ -202,6 +205,9 @@ github.com/modern-go/reflect2
 github.com/nleeper/goment
 github.com/nleeper/goment/locales
 github.com/nleeper/goment/regexps
+# github.com/olahol/melody v1.1.4
+## explicit; go 1.19
+github.com/olahol/melody
 # github.com/pelletier/go-toml/v2 v2.0.8
 ## explicit; go 1.16
 github.com/pelletier/go-toml/v2
