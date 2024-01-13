@@ -29,7 +29,7 @@ func GenerateJWT(params GenerateJWTParams) (string, error) {
 	if params.Expiration != 0 {
 		expirationTime = params.Expiration
 	} else {
-		expirationTime = 1 * time.Hour
+		expirationTime = 720 * time.Hour // 30 days
 	}
 
 	claims := TokenClaims{

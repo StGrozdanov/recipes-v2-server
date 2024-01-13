@@ -53,10 +53,9 @@ func Login(loginData UserAuthData) (userData UserAuthDataResult, err error) {
 	}
 
 	jwtToken, err := utils.GenerateJWT(utils.GenerateJWTParams{
-		Role:       userData.Role,
-		Username:   userData.Username,
-		Id:         userData.Id,
-		Expiration: 1 * time.Hour,
+		Role:     userData.Role,
+		Username: userData.Username,
+		Id:       userData.Id,
 	})
 	if err != nil {
 		return
@@ -151,10 +150,9 @@ func Register(registrationData UserRegistrationData) (userData UserAuthDataResul
 	}
 
 	jwtToken, err := utils.GenerateJWT(utils.GenerateJWTParams{
-		Role:       userData.Role,
-		Username:   userData.Username,
-		Id:         userData.Id,
-		Expiration: 1 * time.Hour,
+		Role:     userData.Role,
+		Username: userData.Username,
+		Id:       userData.Id,
 	})
 	if err != nil {
 		return
