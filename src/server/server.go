@@ -3,7 +3,9 @@ package server
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/olahol/melody"
+	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
+	"recipes-v2-server/database"
 	"recipes-v2-server/server/handlers"
 	"recipes-v2-server/server/middlewares"
 	"recipes-v2-server/utils"
@@ -89,11 +91,41 @@ func setupRouter() (router *gin.Engine) {
 // Run defines the router endpoints and starts the server
 func Run() {
 	router := setupRouter()
+	cronjob := cron.New()
 
-	err := router.Run()
+	_, err := cronjob.AddFunc("0 2 * * 1", cleanUpResetPasswordRequests)
+	if err != nil {
+		utils.GetLogger().WithFields(log.Fields{"error": err.Error()}).Error("Error adding clean up password requests job")
+	}
+	_, err = cronjob.AddFunc("0 0 * * *", cleanUpNotificationsMarkedAsRead)
+	if err != nil {
+		utils.GetLogger().WithFields(log.Fields{"error": err.Error()}).Error("Error adding clean up notifications job")
+	}
+
+	err = router.Run()
 	if err != nil {
 		utils.GetLogger().WithFields(log.Fields{"error": err.Error()}).Error("Unable to start web server")
 	}
 
 	utils.GetLogger().Debug("Web server started ...")
+}
+
+func cleanUpResetPasswordRequests() {
+	_, err := database.ExecuteQuery(
+		`DELETE 
+				FROM password_requests 
+       			WHERE issued_at < CURRENT_TIMESTAMP - INTERVAL '1 day'`,
+	)
+	if err != nil {
+		utils.GetLogger().WithFields(log.Fields{"error": err.Error()}).Error("Error executing clean up password requests job")
+	}
+}
+
+func cleanUpNotificationsMarkedAsRead() {
+	_, err := database.ExecuteQuery(
+		`DELETE FROM notifications WHERE is_marked_as_read IS TRUE;`,
+	)
+	if err != nil {
+		utils.GetLogger().WithFields(log.Fields{"error": err.Error()}).Error("Error executing clean up notifications requests job")
+	}
 }
