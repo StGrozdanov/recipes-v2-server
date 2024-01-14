@@ -95,7 +95,7 @@ func Run() {
 
 	_, err := cronjob.AddFunc("0 2 * * 1", cleanUpResetPasswordRequests)
 	if err != nil {
-		utils.GetLogger().WithFields(log.Fields{"error": err.Error()}).Error("Error adding clean up password requests job")
+		utils.GetLogger().WithFields(log.Fields{"erro": err.Error()}).Error("Error adding clean up password requests job")
 	}
 	_, err = cronjob.AddFunc("0 0 * * *", cleanUpNotificationsMarkedAsRead)
 	if err != nil {
