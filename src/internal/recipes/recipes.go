@@ -25,7 +25,7 @@ func GetAll(limit, cursor int) (recipes RecipePaginationInfo, err error) {
 	}
 
 	var totalRecipesCount int
-	err = database.GetSingleRecord(&totalRecipesCount, `SELECT COUNT(id) FROM recipes;`)
+	err = database.GetSingleRecord(&totalRecipesCount, `SELECT COUNT(id) FROM recipes WHERE status = 'APPROVED';`)
 	if err != nil {
 		return
 	}
