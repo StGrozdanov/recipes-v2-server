@@ -143,3 +143,17 @@ func CreateComment(ginCtx *gin.Context) {
 	}
 	ginCtx.JSON(http.StatusCreated, commentData)
 }
+
+func GetCommentsCount(ginCtx *gin.Context) {
+	commentsCount, err := comments.Count()
+	if err != nil {
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Error("Error on getting comments count")
+
+		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+	ginCtx.JSON(http.StatusOK, map[string]interface{}{"count": commentsCount})
+}

@@ -76,3 +76,9 @@ func Create(data CommentData) (result Comment, err error) {
 	)
 	return
 }
+
+// Count retrieves the total count of the comments
+func Count() (count int, err error) {
+	err = database.GetSingleRecord(&count, `SELECT COUNT(id) FROM comments;`)
+	return
+}

@@ -82,3 +82,9 @@ func EditData(oldUsername string, data User) (response User, err error) {
 	)
 	return
 }
+
+// Count retrieves the total count of the users
+func Count() (count int, err error) {
+	err = database.GetSingleRecord(&count, `SELECT COUNT(id) FROM users;`)
+	return
+}

@@ -24,8 +24,7 @@ func GetAll(limit, cursor int) (recipes RecipePaginationInfo, err error) {
 		return
 	}
 
-	var totalRecipesCount int
-	err = database.GetSingleRecord(&totalRecipesCount, `SELECT COUNT(id) FROM recipes WHERE status = 'APPROVED';`)
+	totalRecipesCount, err := Count()
 	if err != nil {
 		return
 	}
@@ -339,5 +338,11 @@ func Delete(recipeName string) (err error) {
 	}
 
 	err = utils.DeleteFromS3(oldImageURL)
+	return
+}
+
+// Count retrieves the total count of the recipes
+func Count() (count int, err error) {
+	err = database.GetSingleRecord(&count, `SELECT COUNT(id) FROM recipes WHERE status = 'APPROVED';`)
 	return
 }

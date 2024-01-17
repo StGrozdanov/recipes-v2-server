@@ -438,3 +438,17 @@ func DeleteRecipe(ginCtx *gin.Context) {
 	}
 	ginCtx.JSON(http.StatusOK, map[string]interface{}{"status": "success"})
 }
+
+func GetRecipesCount(ginCtx *gin.Context) {
+	recipesCount, err := recipes.Count()
+	if err != nil {
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Error("Error on getting recipes count")
+
+		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+	ginCtx.JSON(http.StatusOK, map[string]interface{}{"count": recipesCount})
+}

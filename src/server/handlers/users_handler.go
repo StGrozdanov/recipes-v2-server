@@ -141,3 +141,17 @@ func EditUserData(ginCtx *gin.Context) {
 	}
 	ginCtx.JSON(http.StatusOK, userData)
 }
+
+func GetUsersCount(ginCtx *gin.Context) {
+	usersCount, err := users.Count()
+	if err != nil {
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Error("Error on getting users count")
+
+		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+	ginCtx.JSON(http.StatusOK, map[string]interface{}{"count": usersCount})
+}
