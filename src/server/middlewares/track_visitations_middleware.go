@@ -16,6 +16,12 @@ func TrackVisitations() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		clientIP := ctx.ClientIP()
 
+		referer := ctx.Request.Referer()
+
+		if referer != "https://all-the-best-recipes.vercel.app/" {
+			return
+		}
+
 		dateNow, err := goment.New(time.Now())
 		if err != nil {
 			return
