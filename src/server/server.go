@@ -94,6 +94,7 @@ func setupRouter() (router *gin.Engine) {
 		adminGroup.GET("/analytics/visitations", handlers.GetVisitationsForTheLastSixMonths)
 		adminGroup.GET("/analytics/most-active-user", handlers.GetTheMostActiveUser)
 		adminGroup.GET("/analytics/visitations/today", handlers.GetVisitationsForTheDay)
+		adminGroup.GET("/search", handlers.Search)
 	}
 
 	return
