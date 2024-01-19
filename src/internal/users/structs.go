@@ -17,3 +17,10 @@ type User struct {
 	Email               string `json:"email" db:"email" valid:"required,email"`
 	CreatedRecipesCount int    `json:"createdRecipesCount" db:"created_recipes_count"`
 }
+
+type UserAdminData struct {
+	User
+	Id        int    `db:"user_id" json:"id"`
+	Role      string `db:"role" json:"role"`
+	IsBlocked bool   `db:"is_blocked" json:"isBlocked"`
+}

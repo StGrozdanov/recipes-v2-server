@@ -53,3 +53,10 @@ type ExtendedRecipeData struct {
 	RecipeData
 	OriginalRecipeName string `db:"old_recipe_name"`
 }
+
+type AdminRecipeData struct {
+	RecipeName string `db:"recipe_name" json:"recipeName" valid:"required,minstringlength(4)"`
+	ImageURL   string `db:"image_url" json:"imageURL" valid:"required,url"`
+	Status     string `db:"status" json:"status"`
+	OwnerName  string `db:"owner_name" json:"ownerName" valid:"required"`
+}

@@ -88,3 +88,26 @@ func Count() (count int, err error) {
 	err = database.GetSingleRecord(&count, `SELECT COUNT(id) FROM users;`)
 	return
 }
+
+// GetAllUsers gets the user details for all users
+func GetAllUsers() (user []UserAdminData, err error) {
+	err = database.GetMultipleRecords(
+		&user,
+		`SELECT email,
+					   users.id 						AS user_id,
+					   role,
+					   username,
+					   blacklist.ip_address IS NOT NULL AS is_blocked,
+					   COALESCE(avatar_url, '')         AS avatar_url,
+					   COALESCE(cover_photo_url, '')    AS cover_photo_url,
+					   COUNT(recipes.id)                AS created_recipes_count
+				FROM users
+						 LEFT JOIN recipes ON recipes.owner_id = users.id
+						 LEFT JOIN users_roles ON users.id = users_roles.user_entity_id
+						 LEFT JOIN roles ON users_roles.roles_id = roles.id
+						 LEFT JOIN user_entity_ip_addresses ON users.id = user_entity_ip_addresses.user_entity_id
+						 LEFT JOIN blacklist ON user_entity_ip_addresses.ip_addresses = blacklist.ip_address
+				GROUP BY avatar_url, cover_photo_url, email, username, users.id, role, blacklist.ip_address;`,
+	)
+	return
+}

@@ -155,3 +155,22 @@ func GetUsersCount(ginCtx *gin.Context) {
 	}
 	ginCtx.JSON(http.StatusOK, map[string]interface{}{"count": usersCount})
 }
+
+func GetAllUsers(ginCtx *gin.Context) {
+	usersData, err := users.GetAllUsers()
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			ginCtx.JSON(http.StatusOK, map[string]interface{}{})
+			return
+		}
+
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Error("Error on getting users from the database")
+
+		ginCtx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+	ginCtx.JSON(http.StatusOK, usersData)
+}

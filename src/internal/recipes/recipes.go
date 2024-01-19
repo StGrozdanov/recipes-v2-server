@@ -346,3 +346,17 @@ func Count() (count int, err error) {
 	err = database.GetSingleRecord(&count, `SELECT COUNT(id) FROM recipes WHERE status = 'APPROVED';`)
 	return
 }
+
+// GetAllAdmin gets all the recipes in a format required by the admin cms app
+func GetAllAdmin() (recipeData []AdminRecipeData, err error) {
+	err = database.GetMultipleRecords(
+		&recipeData,
+		`SELECT recipe_name,
+					   image_url,
+					   status,
+					   username AS owner_name
+				FROM recipes
+						 JOIN users ON recipes.owner_id = users.id;`,
+	)
+	return
+}

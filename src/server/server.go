@@ -85,7 +85,7 @@ func setupRouter() (router *gin.Engine) {
 		resourceOwnerGroup.DELETE("/comments", handlers.DeleteComment)
 	}
 
-	adminGroup := router.Group("")
+	adminGroup := router.Group("/admin")
 	adminGroup.Use(middlewares.AdminMiddleware())
 	{
 		adminGroup.GET("/recipes/count", handlers.GetRecipesCount)
@@ -95,6 +95,8 @@ func setupRouter() (router *gin.Engine) {
 		adminGroup.GET("/analytics/most-active-user", handlers.GetTheMostActiveUser)
 		adminGroup.GET("/analytics/visitations/today", handlers.GetVisitationsForTheDay)
 		adminGroup.GET("/search", handlers.Search)
+		adminGroup.GET("/users", handlers.GetAllUsers)
+		adminGroup.GET("/recipes", handlers.GetAllRecipesAdmin)
 	}
 
 	return
