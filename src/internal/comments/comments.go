@@ -82,3 +82,21 @@ func Count() (count int, err error) {
 	err = database.GetSingleRecord(&count, `SELECT COUNT(id) FROM comments;`)
 	return
 }
+
+// GetAll retrieves all the comments
+func GetAll() (comments []Comment, err error) {
+	err = database.GetMultipleRecords(
+		&comments,
+		`SELECT comments.id,
+    				   comments.content,
+					   comments.created_at,
+					   recipes.recipe_name,
+					   users.username,
+					   COALESCE(users.avatar_url, '') AS avatar_url
+				FROM comments
+						 JOIN recipes ON comments.target_recipe_id = recipes.id
+						 JOIN users ON comments.owner_id = users.id
+				ORDER BY created_at DESC;`,
+	)
+	return
+}

@@ -157,3 +157,22 @@ func GetCommentsCount(ginCtx *gin.Context) {
 	}
 	ginCtx.JSON(http.StatusOK, map[string]interface{}{"count": commentsCount})
 }
+
+func GetAllComments(ctx *gin.Context) {
+	commentsData, err := comments.GetAll()
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			ctx.JSON(http.StatusOK, map[string]interface{}{})
+			return
+		}
+
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Error("Error on getting comments")
+
+		ctx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+	ctx.JSON(http.StatusOK, commentsData)
+}

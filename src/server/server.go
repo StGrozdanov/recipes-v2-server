@@ -97,6 +97,7 @@ func setupRouter() (router *gin.Engine) {
 		adminGroup.GET("/search", handlers.Search)
 		adminGroup.GET("/users", handlers.GetAllUsers)
 		adminGroup.GET("/recipes", handlers.GetAllRecipesAdmin)
+		adminGroup.GET("/comments", handlers.GetAllComments)
 	}
 
 	return
