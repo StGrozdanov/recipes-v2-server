@@ -6,7 +6,7 @@ A Golang server to support the remake of the recipes website - both the frontend
 
 [Frontend here](https://github.com/StGrozdanov/recipes-v2-client)
 
-[Mobile App here](https://github.com/StGrozdanov/recipes-v2-cms-client)
+[Mobile App here](https://github.com/StGrozdanov/recipes-v2-cms-mobile)
 
 ## Project Overview
 
