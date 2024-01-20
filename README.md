@@ -1,6 +1,6 @@
 # Recipes Server
 
-![GitHub last commit](https://img.shields.io/github/last-commit/StGrozdanov/portfolio-cms-server)
+![GitHub last commit](https://img.shields.io/github/last-commit/StGrozdanov/recipes-v2-server)
 
 A Golang server to support the remake of the recipes website - both the frontend client and the mobile app CMS. You can find the: 
 
