@@ -99,6 +99,7 @@ func setupRouter() (router *gin.Engine) {
 		adminGroup.GET("/users/count", handlers.GetUsersCount)
 		adminGroup.GET("/users", handlers.GetAllUsers)
 		adminGroup.DELETE("/users/:id", handlers.DeleteUser)
+		adminGroup.PATCH("/users/change-role", handlers.ChangeRole)
 
 		adminGroup.GET("/analytics/visitations", handlers.GetVisitationsForTheLastSixMonths)
 		adminGroup.GET("/analytics/most-active-user", handlers.GetTheMostActiveUser)

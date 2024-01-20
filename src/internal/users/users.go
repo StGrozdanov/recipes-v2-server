@@ -145,3 +145,14 @@ func Delete(id int) (err error) {
 
 	return
 }
+
+// ChangeRole changes a user role
+func ChangeRole(data UserChangeRoleData) (err error) {
+	_, err = database.ExecuteNamedQuery(
+		`UPDATE users_roles
+				SET roles_id = (SELECT id FROM roles WHERE role = :role LIMIT 1)
+				WHERE user_entity_id = :user_id;`,
+		data,
+	)
+	return
+}

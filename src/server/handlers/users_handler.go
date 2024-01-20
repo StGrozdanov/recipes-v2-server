@@ -207,3 +207,34 @@ func DeleteUser(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, map[string]interface{}{"status": "success"})
 }
+
+func ChangeRole(ctx *gin.Context) {
+	var data users.UserChangeRoleData
+
+	if err := ctx.ShouldBind(&data); err != nil {
+		ctx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "invalid parameters"})
+		return
+	}
+
+	if _, err := validator.ValidateStruct(data); err != nil {
+		ctx.JSON(http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
+		return
+	}
+
+	err := users.ChangeRole(data)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			ctx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "no such user found"})
+			return
+		}
+
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Errorf("Error on change role attempt for user %d", data.UserId)
+
+		ctx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+	ctx.JSON(http.StatusOK, map[string]interface{}{"status": "success"})
+}

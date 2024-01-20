@@ -29,3 +29,8 @@ type UserImages struct {
 	AvatarURL     string `json:"avatarURL" db:"avatar_url"`
 	CoverPhotoURL string `json:"coverPhotoURL" db:"cover_photo_url"`
 }
+
+type UserChangeRoleData struct {
+	UserId int    `db:"user_id" json:"userId" valid:"required"`
+	Role   string `db:"role" json:"role" valid:"required"`
+}
