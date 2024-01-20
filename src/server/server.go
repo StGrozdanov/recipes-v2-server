@@ -91,6 +91,7 @@ func setupRouter() (router *gin.Engine) {
 		adminGroup.GET("/recipes/count", handlers.GetRecipesCount)
 		adminGroup.GET("/recipes", handlers.GetAllRecipesAdmin)
 		adminGroup.DELETE("/recipes/:id", handlers.DeleteAdminRecipe)
+		adminGroup.PATCH("/recipes/:id/approve", handlers.ApproveRecipe)
 
 		adminGroup.GET("/comments/count", handlers.GetCommentsCount)
 		adminGroup.GET("/comments", handlers.GetAllComments)

@@ -387,3 +387,12 @@ func AdminDelete(id int) (err error) {
 	}
 	return
 }
+
+// Approve approves a recipe
+func Approve(id int) (err error) {
+	_, err = database.ExecuteNamedQuery(
+		`UPDATE recipes SET status = 'APPROVED' WHERE id = :id`,
+		map[string]interface{}{"id": id},
+	)
+	return
+}
