@@ -354,9 +354,36 @@ func GetAllAdmin() (recipeData []AdminRecipeData, err error) {
 		`SELECT recipe_name,
 					   image_url,
 					   status,
+					   recipes.id,
 					   username AS owner_name
 				FROM recipes
 						 JOIN users ON recipes.owner_id = users.id;`,
 	)
+	return
+}
+
+// AdminDelete deletes a recipe
+func AdminDelete(id int) (err error) {
+	var oldImageURL string
+
+	err = database.GetSingleRecordNamedQuery(
+		&oldImageURL,
+		`WITH recipe AS (SELECT id FROM recipes WHERE id = :id),
+					 delete_favourites AS (DELETE FROM users_favourites WHERE favourites_id = :id),
+     				 delete_comments AS (DELETE FROM comments WHERE target_recipe_id = :id)
+				
+				DELETE
+				FROM recipes
+				WHERE id = :id
+				RETURNING COALESCE(recipes.image_url, '');`,
+		map[string]interface{}{"id": id},
+	)
+	if err != nil {
+		return
+	}
+
+	if oldImageURL != "" {
+		err = utils.DeleteFromS3(oldImageURL)
+	}
 	return
 }

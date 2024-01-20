@@ -24,3 +24,8 @@ type UserAdminData struct {
 	Role      string `db:"role" json:"role"`
 	IsBlocked bool   `db:"is_blocked" json:"isBlocked"`
 }
+
+type UserImages struct {
+	AvatarURL     string `json:"avatarURL" db:"avatar_url"`
+	CoverPhotoURL string `json:"coverPhotoURL" db:"cover_photo_url"`
+}

@@ -89,15 +89,22 @@ func setupRouter() (router *gin.Engine) {
 	adminGroup.Use(middlewares.AdminMiddleware())
 	{
 		adminGroup.GET("/recipes/count", handlers.GetRecipesCount)
+		adminGroup.GET("/recipes", handlers.GetAllRecipesAdmin)
+		adminGroup.DELETE("/recipes/:id", handlers.DeleteAdminRecipe)
+
 		adminGroup.GET("/comments/count", handlers.GetCommentsCount)
+		adminGroup.GET("/comments", handlers.GetAllComments)
+		adminGroup.DELETE("/comments/:id", handlers.DeleteAdminComment)
+
 		adminGroup.GET("/users/count", handlers.GetUsersCount)
+		adminGroup.GET("/users", handlers.GetAllUsers)
+		adminGroup.DELETE("/users/:id", handlers.DeleteUser)
+
 		adminGroup.GET("/analytics/visitations", handlers.GetVisitationsForTheLastSixMonths)
 		adminGroup.GET("/analytics/most-active-user", handlers.GetTheMostActiveUser)
 		adminGroup.GET("/analytics/visitations/today", handlers.GetVisitationsForTheDay)
+
 		adminGroup.GET("/search", handlers.Search)
-		adminGroup.GET("/users", handlers.GetAllUsers)
-		adminGroup.GET("/recipes", handlers.GetAllRecipesAdmin)
-		adminGroup.GET("/comments", handlers.GetAllComments)
 	}
 
 	return

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"recipes-v2-server/internal/comments"
 	"recipes-v2-server/utils"
+	"strconv"
 )
 
 func GetLatestComments(ginCtx *gin.Context) {
@@ -175,4 +176,36 @@ func GetAllComments(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, commentsData)
+}
+
+func DeleteAdminComment(ctx *gin.Context) {
+	commentId, ok := ctx.Params.Get("id")
+
+	if !ok {
+		ctx.JSON(http.StatusBadRequest, map[string]interface{}{"errors": "comment id was not found"})
+		return
+	}
+
+	commentIdAsNumber, err := strconv.Atoi(commentId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, map[string]interface{}{"errors": err.Error()})
+		return
+	}
+
+	err = comments.Delete(commentIdAsNumber)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			ctx.JSON(http.StatusBadRequest, map[string]interface{}{"error": "no such comment"})
+			return
+		}
+
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Errorf("Error on delete attempt for comment %s", commentId)
+
+		ctx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+	ctx.JSON(http.StatusOK, map[string]interface{}{"status": "success"})
 }

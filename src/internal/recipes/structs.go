@@ -59,4 +59,5 @@ type AdminRecipeData struct {
 	ImageURL   string `db:"image_url" json:"imageURL" valid:"required,url"`
 	Status     string `db:"status" json:"status"`
 	OwnerName  string `db:"owner_name" json:"ownerName" valid:"required"`
+	Id         int    `db:"id" json:"id"`
 }

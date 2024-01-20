@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"recipes-v2-server/internal/users"
 	"recipes-v2-server/utils"
+	"strconv"
 )
 
 func GetUser(ginCtx *gin.Context) {
@@ -173,4 +174,36 @@ func GetAllUsers(ginCtx *gin.Context) {
 		return
 	}
 	ginCtx.JSON(http.StatusOK, usersData)
+}
+
+func DeleteUser(ctx *gin.Context) {
+	userId, ok := ctx.Params.Get("id")
+
+	if !ok {
+		ctx.JSON(http.StatusBadRequest, map[string]interface{}{"errors": "user id was not found"})
+		return
+	}
+
+	userIdAsNumber, err := strconv.Atoi(userId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, map[string]interface{}{"errors": err.Error()})
+		return
+	}
+
+	err = users.Delete(userIdAsNumber)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			ctx.JSON(http.StatusOK, map[string]interface{}{"status": "success"})
+			return
+		}
+
+		utils.
+			GetLogger().
+			WithFields(log.Fields{"error": err.Error()}).
+			Errorf("Error on delete attempt for user %s", userId)
+
+		ctx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+		return
+	}
+	ctx.JSON(http.StatusOK, map[string]interface{}{"status": "success"})
 }

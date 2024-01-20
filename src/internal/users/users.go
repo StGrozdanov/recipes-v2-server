@@ -111,3 +111,37 @@ func GetAllUsers() (user []UserAdminData, err error) {
 	)
 	return
 }
+
+// Delete deletes a user and transfers his recipes to a preferred admin user
+func Delete(id int) (err error) {
+	var oldImageURLs UserImages
+
+	err = database.GetSingleRecordNamedQuery(
+		&oldImageURLs,
+		`WITH transfer_recipes_to_admin AS (UPDATE recipes SET owner_id = 2 WHERE recipes.owner_id = :id),
+					 delete_favourites AS (DELETE FROM users_favourites WHERE user_entity_id = :id),
+					 delete_comments AS (DELETE FROM comments WHERE owner_id = :id),
+					 delete_roles AS (DELETE FROM users_roles WHERE user_entity_id = :id),
+					 delete_ip_address AS (DELETE FROM user_entity_ip_addresses WHERE user_entity_id = :id)
+				
+				DELETE
+				FROM users
+				WHERE id = :id
+				RETURNING COALESCE(avatar_url, '') AS avatar_url, 
+						  COALESCE(cover_photo_url, '') AS cover_photo_url;`,
+		map[string]interface{}{"id": id},
+	)
+	if err != nil {
+		return
+	}
+
+	if oldImageURLs.AvatarURL != "" {
+		err = utils.DeleteFromS3(oldImageURLs.AvatarURL)
+	}
+
+	if oldImageURLs.CoverPhotoURL != "" {
+		err = utils.DeleteFromS3(oldImageURLs.CoverPhotoURL)
+	}
+
+	return
+}
