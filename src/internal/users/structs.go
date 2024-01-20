@@ -34,3 +34,8 @@ type UserChangeRoleData struct {
 	UserId int    `db:"user_id" json:"userId" valid:"required"`
 	Role   string `db:"role" json:"role" valid:"required"`
 }
+
+type BlockUserData struct {
+	UserId int    `db:"user_id" json:"userId" valid:"required"`
+	Reason string `db:"reason" json:"reason" valid:"required"`
+}

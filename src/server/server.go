@@ -100,6 +100,8 @@ func setupRouter() (router *gin.Engine) {
 		adminGroup.GET("/users", handlers.GetAllUsers)
 		adminGroup.DELETE("/users/:id", handlers.DeleteUser)
 		adminGroup.PATCH("/users/change-role", handlers.ChangeRole)
+		adminGroup.POST("/users/block", handlers.BlockUser)
+		adminGroup.POST("/users/unblock/:id", handlers.UnblockUser)
 
 		adminGroup.GET("/analytics/visitations", handlers.GetVisitationsForTheLastSixMonths)
 		adminGroup.GET("/analytics/most-active-user", handlers.GetTheMostActiveUser)

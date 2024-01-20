@@ -156,3 +156,26 @@ func ChangeRole(data UserChangeRoleData) (err error) {
 	)
 	return
 }
+
+// Block blocks a user
+func Block(data BlockUserData) (err error) {
+	_, err = database.ExecuteNamedQuery(
+		`INSERT INTO blacklist (ip_address, reason)
+				SELECT ip_addresses, :reason
+				FROM user_entity_ip_addresses
+				WHERE user_entity_id = :user_id;`,
+		data,
+	)
+	return
+}
+
+// Unblock unblocks a user
+func Unblock(userId int) (err error) {
+	_, err = database.ExecuteNamedQuery(
+		`DELETE
+				FROM blacklist
+				WHERE ip_address IN ((SELECT ip_addresses FROM user_entity_ip_addresses WHERE user_entity_id = :user_id));`,
+		map[string]interface{}{"user_id": userId},
+	)
+	return
+}
