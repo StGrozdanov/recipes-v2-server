@@ -9,6 +9,7 @@ import (
 	"recipes-v2-server/server/handlers"
 	"recipes-v2-server/server/middlewares"
 	"recipes-v2-server/utils"
+	"time"
 )
 
 func setupRouter() (router *gin.Engine) {
@@ -117,16 +118,19 @@ func setupRouter() (router *gin.Engine) {
 // Run defines the router endpoints and starts the server
 func Run() {
 	router := setupRouter()
-	cronjob := cron.New()
+	location := time.FixedZone("UTC", 0)
+	cronjob := cron.New(cron.WithLocation(location))
 
-	_, err := cronjob.AddFunc("0 2 * * 1", cleanUpResetPasswordRequests)
+	_, err := cronjob.AddFunc("0 3 * * 1", cleanUpResetPasswordRequests)
 	if err != nil {
 		utils.GetLogger().WithFields(log.Fields{"error": err.Error()}).Error("Error adding clean up password requests job")
 	}
-	_, err = cronjob.AddFunc("0 0 * * *", cleanUpNotificationsMarkedAsRead)
+	_, err = cronjob.AddFunc("0 4 * * *", cleanUpNotificationsMarkedAsRead)
 	if err != nil {
 		utils.GetLogger().WithFields(log.Fields{"error": err.Error()}).Error("Error adding clean up notifications job")
 	}
+
+	cronjob.Start()
 
 	err = router.Run()
 	if err != nil {
