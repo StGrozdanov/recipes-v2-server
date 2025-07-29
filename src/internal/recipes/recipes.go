@@ -17,7 +17,7 @@ func GetAll(limit, cursor int) (recipes RecipePaginationInfo, err error) {
 		`SELECT recipe_name, image_url
 			FROM recipes
 			WHERE status = 'APPROVED'
-			ORDER BY created_at DESC
+			ORDER BY created_at
 			LIMIT :limit OFFSET :offset;`,
 		map[string]interface{}{"limit": limit, "offset": offset},
 	)
