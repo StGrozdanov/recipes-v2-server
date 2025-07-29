@@ -3,7 +3,7 @@ name: build
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - "v[0-9]+.[0-9]+.[0-9]+"
 
 concurrency:
   group: ${{ github.ref }}
@@ -29,7 +29,7 @@ jobs:
       - name: Setup go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.21.x'
+          go-version: "1.21.x"
           cache-dependency-path: ${{ env.PATH_PREFIX }}/go.sum
       - name: Set cache outputs
         id: app-cache
@@ -56,7 +56,7 @@ jobs:
 
   lint_app:
     name: Linters
-    needs: [ install_app ]
+    needs: [install_app]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -64,7 +64,7 @@ jobs:
       - name: Setup go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.21.x'
+          go-version: "1.21.x"
           cache-dependency-path: ${{ env.PATH_PREFIX }}/go.sum
       - name: Load dependencies
         uses: actions/cache@v3
@@ -79,7 +79,7 @@ jobs:
 
   test_app:
     name: Tests
-    needs: [ install_app ]
+    needs: [install_app]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -90,7 +90,7 @@ jobs:
       - name: Setup go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.21.x'
+          go-version: "1.21.x"
           cache-dependency-path: ${{ env.PATH_PREFIX }}/go.sum
       - name: Load dependencies
         uses: actions/cache@v3
@@ -107,7 +107,7 @@ jobs:
 
   deploy:
     name: Deploy
-    needs: [ lint_app, test_app ]
+    needs: [lint_app, test_app]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -115,6 +115,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only
+      - name: Deploy application
+        run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
