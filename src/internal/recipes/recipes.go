@@ -10,15 +10,16 @@ import (
 
 // GetAll gets the recipes in a pageable way
 func GetAll(limit, cursor int) (recipes RecipePaginationInfo, err error) {
+	offset := cursor
+
 	err = database.GetMultipleRecordsNamedQuery(
 		&recipes.BaseRecipeInfoArray,
-		`SELECT recipe_name,
-					   image_url
-				FROM recipes
-				WHERE id > :cursor AND status = 'APPROVED'
-				ORDER BY created_at
-				LIMIT :limit;`,
-		map[string]interface{}{"limit": limit, "cursor": cursor},
+		`SELECT recipe_name, image_url
+			FROM recipes
+			WHERE status = 'APPROVED'
+			ORDER BY created_at DESC
+			LIMIT :limit OFFSET :offset;`,
+		map[string]interface{}{"limit": limit, "offset": offset},
 	)
 	if err != nil {
 		return
@@ -29,15 +30,22 @@ func GetAll(limit, cursor int) (recipes RecipePaginationInfo, err error) {
 		return
 	}
 
-	if cursor == 0 || cursor-limit < 0 {
+	recordsReturned := len(recipes.BaseRecipeInfoArray)
+
+	recipes.PageData.FirstPage = offset == 0
+	recipes.PageData.LastPage = offset+recordsReturned >= totalRecipesCount
+
+	if offset == 0 {
 		recipes.PageData.PrevPage = 0
 	} else {
-		recipes.PageData.PrevPage = cursor - limit
+		recipes.PageData.PrevPage = max(offset-limit, 0)
 	}
 
-	recipes.PageData.NextPage = limit + cursor
-	recipes.PageData.FirstPage = cursor == 0
-	recipes.PageData.LastPage = limit+cursor >= totalRecipesCount
+	if recipes.PageData.LastPage {
+		recipes.PageData.NextPage = 0
+	} else {
+		recipes.PageData.NextPage = offset + limit
+	}
 
 	return
 }
