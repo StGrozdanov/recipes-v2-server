@@ -100,7 +100,7 @@ jobs:
       - name: Run tests
         run: go test -v ./... -json > test-results-${{ github.ref_name }}.json
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ github.ref_name }}.json
           path: ${{ inputs.working-directory || github.workspace }}/test-results-${{ github.ref_name }}.json
