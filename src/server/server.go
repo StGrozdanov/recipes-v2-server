@@ -43,7 +43,7 @@ func setupRouter() (router *gin.Engine) {
 	router.POST("/auth/login", handlers.Login)
 	router.POST("/auth/check-username", handlers.CheckUsername)
 	router.POST("/auth/check-email", handlers.CheckEmail)
-	router.POST("/auth/register", handlers.Register)
+	// router.POST("/auth/register", handlers.Register)
 	router.POST("/auth/generate-verification-code", handlers.GenerateVerificationCode)
 	router.POST("/auth/verify-code", handlers.VerifyCode)
 	router.POST("/auth/reset-password", handlers.ResetPassword)
