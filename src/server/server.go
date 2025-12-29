@@ -46,7 +46,7 @@ func setupRouter() (router *gin.Engine) {
 	// router.POST("/auth/register", handlers.Register)
 	router.POST("/auth/generate-verification-code", handlers.GenerateVerificationCode)
 	router.POST("/auth/verify-code", handlers.VerifyCode)
-	router.POST("/auth/reset-password", handlers.ResetPassword)
+	// router.POST("/auth/reset-password", handlers.ResetPassword)
 
 	router.GET("/realtime-notifications", func(ctx *gin.Context) {
 		if err := websocket.HandleRequest(ctx.Writer, ctx.Request); err != nil {
