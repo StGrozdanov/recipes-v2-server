@@ -22,6 +22,7 @@ func setupRouter() (router *gin.Engine) {
 	router.Use(middlewares.TrackVisitations())
 	router.Use(middlewares.FilterBlockedUsers())
 
+	router.HEAD("/healths", handlers.HealthCheck)
 	router.GET("/healths", handlers.HealthCheck)
 	router.GET("/metrics", handlers.Metrics)
 
