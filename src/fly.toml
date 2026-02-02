@@ -4,7 +4,7 @@
 #
 
 app = "recipes-v2-server"
-primary_region = "ams"
+primary_region = "fra"
 
 [build]
   dockerfile = "../Dockerfile.prod"
